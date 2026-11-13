@@ -435,8 +435,27 @@ function renderPanel(){
     const byF = fac.map(x=>Math.min(pimX, base*x.f) + credDev);
     const bySh = Math.min(pimX, base + avg(fac.map(x=>x.sh))*pimX) + credDev;
     PH = {fac, avgF: Math.min(pimX, base*avg(fac.map(x=>x.f))) + credDev, minF: Math.min(...byF), maxF: Math.max(...byF), bySh, credDev, base};
-    PH.central = (PH.avgF + PH.bySh)/2;
-    PH.minF = Math.min(PH.minF, PH.bySh); PH.maxF = Math.max(PH.maxF, PH.bySh);   // mismo criterio que el reporte comparativo
+    // Método calibrado (mismo que el reporte comparativo; nucleo/datos/calibracion.json)
+    const CAL = {
+ "metodo": "promedio de cuatro métodos (factor, % del PIM, % de lo que falta, ritmo de 3 meses)",
+ "q10": -0.2291,
+ "q90": 0.328,
+ "n": 3816,
+ "anios": [
+  2024,
+  2025
+ ],
+ "mae_actual": 9.2,
+ "mae_nuevo": 8.0,
+ "cobertura_fuera_de_muestra": 74
+}, capX = v => Math.min(pimX, Math.max(base, v)), mPost = 12 - mesCorte;
+    const rr = hs.map(([,o])=>(o.fin-o.hasta)/Math.max(1, o.pim-o.hasta));
+    const rit3 = avg(SINC.dm.slice(Math.max(0, mesCorte-3), mesCorte));
+    const mF = capX(base*avg(fac.map(x=>x.f))), mS = capX(base + avg(fac.map(x=>x.sh))*pimX), mR = capX(base + avg(rr)*(pimX-base)), mT = capX(base + rit3*mPost);
+    const cX = (mF+mS+mR+mT)/4, falta = Math.max(0, pimX-base);
+    Object.assign(PH, {rr: avg(rr), byR: mR + credDev, rit3, mPost, byT: mT + credDev, CAL});
+    PH.central = cX + credDev;
+    PH.minF = capX(cX + CAL.q10*falta) + credDev; PH.maxF = capX(cX + CAL.q90*falta) + credDev;
   }
   const cierre = PH ? PH.central : proy(prom);
   const semanal = saldo/semRest;
@@ -541,11 +560,13 @@ function renderPanel(){
 
   <section class="card">
     <h2>¿Cómo cerraría el año?</h2>
-    ${PH?`<p class="sub">Escenarios, no pronósticos. Si noviembre y diciembre repiten lo ocurrido en ${HY}: escenario central <b>${P1(ratio(PH.central,tv[PIM]))}</b> (${M1(tv[PIM]-PH.central)} sin devengar); menor ejecución <b>${P1(ratio(PH.minF,tv[PIM]))}</b>; mayor ejecución <b>${P1(ratio(PH.maxF,tv[PIM]))}</b>. Se supone que el PIM no cambia hasta el cierre. Ambos métodos usan los mismos años, por lo que no son evidencias independientes.</p>
+    ${PH?`<p class="sub">Escenarios, no pronósticos. Si noviembre y diciembre repiten lo ocurrido en ${HY}: escenario central <b>${P1(ratio(PH.central,tv[PIM]))}</b> (${M1(tv[PIM]-PH.central)} sin devengar); rango de referencia de <b>${P1(ratio(PH.minF,tv[PIM]))}</b> a <b>${P1(ratio(PH.maxF,tv[PIM]))}</b>. Se supone que el PIM no cambia hasta el cierre. El rango sale de los errores observados al aplicar el mismo método a unas 1 900 municipalidades en 2024 y 2025.</p>
     <div class="tbl-wrap"><table><thead><tr><th>Método</th><th class="r">Devengado al 31/12</th><th class="r">Ejecución</th><th class="r">Sin devengar</th></tr></thead><tbody>
-      <tr class="hl"><td><b>Escenario central</b><div class="sub" style="margin:0;font-size:12px">promedio de los dos métodos siguientes</div></td><td class="r num">${M1(PH.central)}</td><td class="r num">${P1(ratio(PH.central,tv[PIM]))}</td><td class="r num" style="color:var(--red);font-weight:700">${M1(tv[PIM]-PH.central)}</td></tr>
+      <tr class="hl"><td><b>Escenario central</b><div class="sub" style="margin:0;font-size:12px">promedio de los cuatro métodos siguientes</div></td><td class="r num">${M1(PH.central)}</td><td class="r num">${P1(ratio(PH.central,tv[PIM]))}</td><td class="r num" style="color:var(--red);font-weight:700">${M1(tv[PIM]-PH.central)}</td></tr>
       <tr><td>Factor de cierre (devengado a fin de ${finMes}${PH.credDev?' sin operaciones de crédito':''} × ${avg(PH.fac.map(x=>x.f)).toFixed(2)}${PH.credDev?' + '+M1(PH.credDev)+' de operaciones de crédito':''})<div class="sub" style="margin:0;font-size:12px">${PH.fac.map(x=>`${x.y}: ×${x.f.toFixed(2)}`).join(' · ')}</div></td><td class="r num">${M1(PH.avgF)}</td><td class="r num">${P1(ratio(PH.avgF,tv[PIM]))}</td><td class="r num">${M1(tv[PIM]-PH.avgF)}</td></tr>
       <tr><td>Gasto de ${MESES[mesCorte].toLowerCase()}–dic como % del PIM (${P1(avg(PH.fac.map(x=>x.sh)))})<div class="sub" style="margin:0;font-size:12px">${PH.fac.map(x=>`${x.y}: ${P1(x.sh)}`).join(' · ')}</div></td><td class="r num">${M1(PH.bySh)}</td><td class="r num">${P1(ratio(PH.bySh,tv[PIM]))}</td><td class="r num">${M1(tv[PIM]-PH.bySh)}</td></tr>
+      <tr><td>Gasto de ${MESES[mesCorte].toLowerCase()}–dic como % de lo que faltaba devengar (${P1(PH.rr)})</td><td class="r num">${M1(PH.byR)}</td><td class="r num">${P1(ratio(PH.byR,tv[PIM]))}</td><td class="r num">${M1(tv[PIM]-PH.byR)}</td></tr>
+      <tr><td>Ritmo de los tres últimos meses (${M1(PH.rit3)}/mes) por ${PH.mPost} meses</td><td class="r num">${M1(PH.byT)}</td><td class="r num">${P1(ratio(PH.byT,tv[PIM]))}</td><td class="r num">${M1(tv[PIM]-PH.byT)}</td></tr>
     </tbody></table></div>
     <p class="sub" style="margin-top:12px">Escenarios sin repunte de fin de año (solo con el ritmo de los meses previos):</p>`
     :`<p class="sub">Si nada cambia, el año cerraría entre ${P1(Math.min(ratio(proy(prom),tv[PIM]),ratio(proy(prom3),tv[PIM])))} y ${P1(Math.max(ratio(proy(prom),tv[PIM]),ratio(proy(prom3),tv[PIM])))} de ejecución. Estas proyecciones no consideran el repunte habitual de diciembre.</p>`}
@@ -553,9 +574,9 @@ function renderPanel(){
       <div class="proj"><div class="lab">Al ritmo promedio del año (${M1(prom)}/mes)</div><div class="big num">${P1(ratio(proy(prom),tv[PIM]))}</div><div class="sub">${M1(proy(prom))} al 31/12 · <b style="color:var(--red)">saldo sin gastar: ${M1(tv[PIM]-proy(prom))}</b></div></div>
       <div class="proj"><div class="lab">Al ritmo de los últimos 3 meses (${M1(prom3)}/mes)</div><div class="big num">${P1(ratio(proy(prom3),tv[PIM]))}</div><div class="sub">${M1(proy(prom3))} al 31/12 · <b style="color:var(--red)">saldo sin gastar: ${M1(tv[PIM]-proy(prom3))}</b></div></div>
     </div>
-    <div class="alert">Para devengar todo el PIM se necesitarían <b>${M1(necesario)} por mes</b> hasta el 31/12: ${(ratio(necesario,prom)).toFixed(1)} veces el promedio mensual del año. ${PH?'Ninguno de los escenarios basados en '+HY+' llega a devengar todo el PIM.':''}</div>
+    <div class="alert">Para devengar todo el PIM se necesitarían <b>${M1(necesario)} por mes</b> hasta el 31/12: ${(ratio(necesario,prom)).toFixed(1)} veces el promedio mensual del año. ${PH&&PH.maxF<tv[PIM]-1?'Ni siquiera el extremo alto del rango de referencia llega a devengar todo el PIM.':''}</div>
     <details style="margin-top:12px"><summary>¿Cómo se calcula?</summary>
-      <p class="sub" style="margin-top:8px">Referencia lineal = días transcurridos ÷ días del año (${doy} ÷ ${diy}); supone gasto uniforme.${PH?` Factor de cierre de cada año anterior = devengado anual ÷ devengado a fin de ${finMes}; se aplica al devengado de este año a la misma fecha (${M1(base)}${PH.credDev?', sin operaciones de crédito':''}). El segundo método suma al mismo devengado el gasto que en años anteriores se hizo de ${MESES[mesCorte].toLowerCase()} a diciembre, como % del PIM. Ambos se limitan al PIM actual. Los porcentajes históricos usan el PIM final de cada año (comparación retrospectiva). Menor y mayor ejecución: el valor más bajo y el más alto entre los factores de cierre de cada año y el segundo método. El devengado parcial del mes en curso no se suma dos veces: los métodos históricos parten del devengado a fin de ${finMes}.${PH.credDev?` Las operaciones oficiales de crédito (rubro 19: CIPRL, bonos, préstamos) quedan fuera de ambos métodos, porque su devengado sigue el cronograma de la obra financiada y no el ritmo de gasto de la entidad: se suma a cada escenario el devengado ya registrado con ese rubro (${M1(PH.credDev)}) y no se proyecta el resto de su PIM.`:''}`:''} Proyección por ritmo = devengado actual + ritmo mensual × meses que faltan (${mesesRest.toFixed(2)}). El promedio usa los meses completos (enero a ${MESES[Math.max(0,mesCorte-1)].toLowerCase()}); el mes en curso es parcial y no entra en el promedio. Ritmo necesario = saldo por devengar ÷ meses que faltan.</p></details>
+      <p class="sub" style="margin-top:8px">Referencia lineal = días transcurridos ÷ días del año (${doy} ÷ ${diy}); supone gasto uniforme.${PH?` Factor de cierre de cada año anterior = devengado anual ÷ devengado a fin de ${finMes}; se aplica al devengado de este año a la misma fecha (${M1(base)}${PH.credDev?', sin operaciones de crédito':''}). El segundo método suma al mismo devengado el gasto que en años anteriores se hizo de ${MESES[mesCorte].toLowerCase()} a diciembre, como % del PIM; el tercero, ese gasto como % de lo que faltaba devengar; el cuarto, el ritmo de los tres últimos meses. El escenario central promedia los cuatro, limitados al PIM actual. Los porcentajes históricos usan el PIM final de cada año (comparación retrospectiva). El rango de referencia suma al central los percentiles 10 y 90 de los errores de la prueba nacional (unas 1 900 municipalidades, 2024 y 2025), medidos como parte de lo que faltaba devengar. El devengado parcial del mes en curso no se suma dos veces: los métodos históricos parten del devengado a fin de ${finMes}.${PH.credDev?` Las operaciones oficiales de crédito (rubro 19: CIPRL, bonos, préstamos) quedan fuera de los métodos, porque su devengado sigue el cronograma de la obra financiada y no el ritmo de gasto de la entidad: se suma a cada escenario el devengado ya registrado con ese rubro (${M1(PH.credDev)}) y no se proyecta el resto de su PIM.`:''}`:''} Proyección por ritmo = devengado actual + ritmo mensual × meses que faltan (${mesesRest.toFixed(2)}). El promedio usa los meses completos (enero a ${MESES[Math.max(0,mesCorte-1)].toLowerCase()}); el mes en curso es parcial y no entra en el promedio. Ritmo necesario = saldo por devengar ÷ meses que faltan.</p></details>
   </section>
   <footer>Reporte generado automáticamente con datos públicos del MEF. Montos en soles. Las áreas indicadas son responsables propuestos. Las brechas entre fases del gasto son señales para revisar, no causas comprobadas.</footer>`;
   renderConcentra();
