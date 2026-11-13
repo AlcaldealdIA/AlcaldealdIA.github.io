@@ -363,7 +363,7 @@ function renderEvolucion(){
   // Escenarios: sin operaciones oficiales de crédito (rubro 19), cuyo devengado sigue el cronograma de la obra financiada;
   // a cada escenario se suma el devengado de ese rubro ya registrado al corte (credDev). Sin rubro 19, es el método de siempre.
   const CRED='19', X={}; YEARS.forEach(y=>{X[y]=agg(y,null,r=>r[2]!==CRED).get('*')||{v:[0,0,0,0,0,0,0],dm:new Array(12).fill(0)};});
-  let credDev=tv(CUR)[DEV]-X[CUR].v[DEV]; if(Math.abs(credDev)<1){ credDev=0; YEARS.forEach(y=>X[y]=T[y]); } // sin devengado de crédito en el año: método de siempre
+  let credDev=tv(CUR)[DEV]-X[CUR].v[DEV]; if(Math.abs(credDev)<Math.max(1,0.005*tv(CUR)[PIM])){ credDev=0;  /* menos de 0.5 % del PIM: no se separa */ YEARS.forEach(y=>X[y]=T[y]); } // sin devengado de crédito en el año: método de siempre
   const accX=(y,m)=>X[y].dm.slice(0,m+1).reduce((a,b)=>a+b,0), pimX=X[CUR].v[PIM];
   const factor=CLOSED.map(y=>ratio(X[y].v[DEV], accX(y,mBase))).filter(x=>x>0&&isFinite(x));
   const baseCur=accX(CUR,mBase), pimCur=tv(CUR)[PIM];

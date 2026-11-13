@@ -425,7 +425,7 @@ function renderPanel(){
   // Los escenarios se calculan sin operaciones oficiales de crédito (rubro 19) y luego suman su devengado al corte:
   // ese devengado sigue el cronograma de la obra financiada (CIPRL, bonos), no el ritmo de gasto de la entidad.
   let SINC = agg(F.filter(r=>r[2]!=='19'),null)[0] || {v:[0,0,0,0,0,0,0], dm:new Array(12).fill(0)};
-  let credDev = tv[DEV] - SINC.v[DEV]; if (Math.abs(credDev) < 1) { credDev = 0; SINC = TOT; }   // sin devengado de crédito: método de siempre
+  let credDev = tv[DEV] - SINC.v[DEV]; if (Math.abs(credDev) < Math.max(1, 0.005 * tv[PIM])) { credDev = 0; SINC = TOT; }   /* menos de 0.5 % del PIM: no se separa */   // sin devengado de crédito: método de siempre
   const pimX = SINC.v[PIM];
   const base = hastaMes(SINC);
   let PH = null;
