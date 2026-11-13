@@ -360,20 +360,25 @@ function renderEvolucion(){
   // acumulado hasta fin del último mes completo del año en curso
   const mBase=mesCorte-1; // índice del último mes completo
   const accTo=(y,m)=>T[y].dm.slice(0,m+1).reduce((a,b)=>a+b,0);
-  const factor=CLOSED.map(y=>ratio(tv(y)[DEV], accTo(y,mBase))).filter(x=>x>0&&isFinite(x));
-  const baseCur=accTo(CUR,mBase), pimCur=tv(CUR)[PIM];
-  const projHist=factor.map(f=>Math.min(pimCur,baseCur*f));
-  const projAvg=Math.min(pimCur,baseCur*avg(factor)) /* promedio de factores y luego tope en el PIM, igual que el reporte anual */, projMin=Math.min(...projHist), projMax=Math.max(...projHist);
+  // Escenarios: sin operaciones oficiales de crédito (rubro 19), cuyo devengado sigue el cronograma de la obra financiada;
+  // a cada escenario se suma el devengado de ese rubro ya registrado al corte (credDev). Sin rubro 19, es el método de siempre.
+  const CRED='19', X={}; YEARS.forEach(y=>{X[y]=agg(y,null,r=>r[2]!==CRED).get('*')||{v:[0,0,0,0,0,0,0],dm:new Array(12).fill(0)};});
+  let credDev=tv(CUR)[DEV]-X[CUR].v[DEV]; if(Math.abs(credDev)<Math.max(1,0.005*tv(CUR)[PIM])){ credDev=0;  /* menos de 0.5 % del PIM: no se separa */ YEARS.forEach(y=>X[y]=T[y]); } // sin devengado de crédito en el año: método de siempre
+  const accX=(y,m)=>X[y].dm.slice(0,m+1).reduce((a,b)=>a+b,0), pimX=X[CUR].v[PIM];
+  const factor=CLOSED.map(y=>ratio(X[y].v[DEV], accX(y,mBase))).filter(x=>x>0&&isFinite(x));
+  const baseCur=accX(CUR,mBase), pimCur=tv(CUR)[PIM];
+  const projHist=factor.map(f=>Math.min(pimX,baseCur*f)+credDev);
+  const projAvg=Math.min(pimX,baseCur*avg(factor))+credDev /* promedio de factores y luego tope en el PIM, igual que el reporte anual */, projMin=Math.min(...projHist), projMax=Math.max(...projHist);
   const compl=T[CUR].dm.slice(0,mesCorte); const ritmo=avg(compl), ritmo3=avg(compl.slice(-3));
   const pR=Math.min(pimCur,tv(CUR)[DEV]+ritmo*mesesRest), pR3=Math.min(pimCur,tv(CUR)[DEV]+ritmo3*mesesRest);
-  const novdicSh=CLOSED.map(y=>ratio(tv(y)[DEV]-accTo(y,mBase),tv(y)[PIM]));
-  const projSh=Math.min(pimCur, baseCur+avg(novdicSh)*pimCur);
+  const novdicSh=CLOSED.map(y=>ratio(X[y].v[DEV]-accX(y,mBase),X[y].v[PIM]));
+  const projSh=Math.min(pimX, baseCur+avg(novdicSh)*pimX)+credDev;
   const central=(projAvg+projSh)/2, lo=Math.min(projMin,projSh), hi=Math.max(projMax,projSh);
   const noEjAvg=pimCur-central;
   const novdic=CLOSED.map(y=>ratio(tv(y)[DEV]-accTo(y,mBase),tv(y)[DEV]));
   // Indicadores calculados que reutilizan la portada y el informe (fuente única; ver portal/build_index.py)
   window.__IND = {corte:META.corte, mesBase:MESES[mBase], cur:CUR, closed:CLOSED, pimCur, devCur:tv(CUR)[DEV], baseCur,
-    central, lo, hi, projAvg, projSh, projMin, projMax, pR, pR3, saldoAvg, ejAvg, factor, projHist, novdicShAvg:avg(novdicSh), ritmo, ritmo3, mesesRest,
+    central, lo, hi, projAvg, projSh, projMin, projMax, pR, pR3, credDev, pimX, saldoAvg, ejAvg, factor, projHist, novdicShAvg:avg(novdicSh), ritmo, ritmo3, mesesRest,
     finMes:Object.fromEntries(YEARS.map(y=>[y, ratio(accTo(y,mBase), tv(y)[PIM])])),
     finMesProm: avg(CLOSED.map(y=>ratio(accTo(y,mBase), tv(y)[PIM]))),
     pia:Object.fromEntries(YEARS.map(y=>[y,tv(y)[PIA]])), pim:Object.fromEntries(YEARS.map(y=>[y,tv(y)[PIM]])), dev:Object.fromEntries(YEARS.map(y=>[y,tv(y)[DEV]]))};
@@ -414,10 +419,10 @@ function renderEvolucion(){
 
   <section class="card">
     <h2>${CUR}: ¿cuánto se dejará de ejecutar?</h2>
-    <p class="sub">La entidad concentra mucho gasto en noviembre y, sobre todo, en diciembre (${CLOSED.map((y,i)=>`${y}: ${P1(novdic[i])} del gasto anual`).join(' · ')}). Por eso los escenarios principales repiten ese comportamiento y no solo el ritmo de los meses anteriores. Son escenarios, no pronósticos: suponen que el PIM actual no cambia hasta el cierre.</p>
+    <p class="sub">La entidad concentra mucho gasto en noviembre y, sobre todo, en diciembre (${CLOSED.map((y,i)=>`${y}: ${P1(novdic[i])} del gasto anual`).join(' · ')}). Por eso los escenarios principales repiten ese comportamiento y no solo el ritmo de los meses anteriores. Son escenarios, no pronósticos: suponen que el PIM actual no cambia hasta el cierre.${credDev?` Las operaciones oficiales de crédito (CIPRL, bonos) se tratan aparte: su devengado sigue el cronograma de la obra financiada, no el ritmo de gasto de la entidad, así que cada escenario suma lo ya devengado con ese rubro (${M1(credDev)}) y no proyecta el resto de su PIM.`:''}</p>
     <div class="tbl-wrap"><table><thead><tr><th>Método</th><th class="r">Devengado al 31/12</th><th class="r">Ejecución</th><th class="r">Saldo no devengado</th></tr></thead><tbody>
       <tr class="hl"><td><b>Escenario central</b><div class="sub" style="margin:0;font-size:12px">promedio de los dos métodos siguientes</div></td><td class="r num">${M1(central)}</td><td class="r num">${P1(ratio(central,pimCur))}</td><td class="r num" style="color:var(--red);font-weight:700">${M1(pimCur-central)}</td></tr>
-      <tr><td>Factor de cierre: devengado a fin de ${MESES[mBase].toLowerCase()} × ${avg(factor).toFixed(2)}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ×${factor[i].toFixed(2)}`).join(' · ')}</div></td><td class="r num">${M1(projAvg)}</td><td class="r num">${P1(ratio(projAvg,pimCur))}</td><td class="r num">${M1(pimCur-projAvg)}</td></tr>
+      <tr><td>Factor de cierre: devengado a fin de ${MESES[mBase].toLowerCase()}${credDev?' sin operaciones de crédito':''} × ${avg(factor).toFixed(2)}${credDev?' + '+M1(credDev)+' de crédito':''}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ×${factor[i].toFixed(2)}`).join(' · ')}</div></td><td class="r num">${M1(projAvg)}</td><td class="r num">${P1(ratio(projAvg,pimCur))}</td><td class="r num">${M1(pimCur-projAvg)}</td></tr>
       <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM: ${P1(avg(novdicSh))}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ${P1(novdicSh[i])}`).join(' · ')}</div></td><td class="r num">${M1(projSh)}</td><td class="r num">${P1(ratio(projSh,pimCur))}</td><td class="r num">${M1(pimCur-projSh)}</td></tr>
       <tr><td>Escenario de mayor ejecución (como el mejor cierre: ×${Math.max(...factor).toFixed(2)})</td><td class="r num">${M1(projMax)}</td><td class="r num">${P1(ratio(projMax,pimCur))}</td><td class="r num">${M1(pimCur-projMax)}</td></tr>
       <tr><td>Escenario de menor ejecución (como el peor cierre: ×${Math.min(...factor).toFixed(2)})</td><td class="r num">${M1(projMin)}</td><td class="r num">${P1(ratio(projMin,pimCur))}</td><td class="r num">${M1(pimCur-projMin)}</td></tr>
@@ -426,16 +431,16 @@ function renderEvolucion(){
     </tbody></table></div>
     <h3 style="margin-top:14px">¿Cómo se construyen los escenarios?</h3>
     <div class="tbl-wrap"><table><thead><tr><th>Método</th><th>Corte y base</th><th class="r">Factor o % aplicado</th><th class="r">Resultado</th><th>Uso</th></tr></thead><tbody>
-      ${CLOSED.map((y,i)=>`<tr><td>Factor de cierre ${y}</td><td>Devengado a fin de ${MESES[mBase].toLowerCase()} ${CUR}: ${M1(baseCur)}</td><td class="r num">×${factor[i].toFixed(3)}</td><td class="r num">${M1(projHist[i])}${baseCur*factor[i]>pimCur?' (limitado al PIM)':''}</td><td>Candidato a extremo; entra al promedio de factores</td></tr>`).join('')}
+      ${CLOSED.map((y,i)=>`<tr><td>Factor de cierre ${y}</td><td>Devengado a fin de ${MESES[mBase].toLowerCase()} ${CUR}${credDev?' sin operaciones de crédito':''}: ${M1(baseCur)}${credDev?' (+ '+M1(credDev)+' de crédito)':''}</td><td class="r num">×${factor[i].toFixed(3)}</td><td class="r num">${M1(projHist[i])}${baseCur*factor[i]>pimX?' (limitado al PIM)':''}</td><td>Candidato a extremo; entra al promedio de factores</td></tr>`).join('')}
       <tr><td>Promedio de los factores</td><td>—</td><td class="r num">—</td><td class="r num">${M1(projAvg)}</td><td>Entra al escenario central</td></tr>
-      <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM</td><td>${M1(baseCur)} + % × PIM ${CUR} (${M1(pimCur)})</td><td class="r num">${P1(avg(novdicSh))}</td><td class="r num">${M1(projSh)}</td><td>Entra al escenario central; candidato a extremo</td></tr>
+      <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM</td><td>${M1(baseCur)} + % × PIM ${CUR}${credDev?' sin operaciones de crédito':''} (${M1(pimX)})${credDev?' + '+M1(credDev)+' de crédito':''}</td><td class="r num">${P1(avg(novdicSh))}</td><td class="r num">${M1(projSh)}</td><td>Entra al escenario central; candidato a extremo</td></tr>
       <tr class="hl"><td><b>Escenario central</b></td><td colspan="2">(promedio de factores + segundo método) ÷ 2</td><td class="r num"><b>${M1(central)}</b></td><td>${P1(ratio(central,pimCur))} del PIM</td></tr>
       <tr><td>Escenario de menor ejecución</td><td colspan="2">mínimo entre los tres factores y el segundo método</td><td class="r num">${M1(lo)}</td><td>${P1(ratio(lo,pimCur))} del PIM</td></tr>
       <tr><td>Escenario de mayor ejecución</td><td colspan="2">máximo entre los tres factores y el segundo método</td><td class="r num">${M1(hi)}</td><td>${P1(ratio(hi,pimCur))} del PIM</td></tr>
     </tbody></table></div>
     <p class="sub" style="font-size:12px">Se usan los valores sin redondear. El PIM de cierre se supone igual al vigente; ningún resultado puede superarlo. Son escenarios descriptivos, no probabilidades ni intervalos de confianza.</p>
     <div class="alert">En el escenario central, ${CUR} cerraría con <b>${P1(ratio(central,pimCur))}</b> de ejecución y un saldo no devengado de <b>${M1(pimCur-central)}</b>; entre los escenarios de mayor y menor ejecución, de ${M1(pimCur-hi)} a ${M1(pimCur-lo)}. Es ${M1(Math.abs(pimCur-central-saldoAvg))} ${pimCur-central>saldoAvg?'más':'menos'} que el promedio de los años cerrados (${M1(saldoAvg)} por año).</div>
-    <details style="margin-top:12px"><summary>¿Cómo se calcula?</summary><p class="sub" style="margin-top:6px">Factor de cierre de cada año = devengado anual ÷ devengado acumulado a fin de ${MESES[mBase].toLowerCase()}; se aplica al devengado de ${CUR} a la misma fecha (${M1(baseCur)}). El segundo método suma a ese devengado el gasto que cada año se hizo de ${MESES[mBase+1].toLowerCase()} a diciembre, medido como % de su PIM. Ambos se limitan al PIM. El rango de escenarios va del valor más bajo al más alto entre los factores de cierre de cada año y el segundo método. Los métodos históricos parten del devengado a fin de ${MESES[mBase].toLowerCase()}, de modo que el gasto parcial del mes en curso no se suma dos veces. Usan los mismos años, por lo que no son evidencias independientes, y los porcentajes de años anteriores usan su PIM final (comparación retrospectiva). Los métodos de ritmo suman el promedio mensual por los ${mesesRest.toFixed(2)} meses que faltan, sin el repunte de diciembre.</p></details>
+    <details style="margin-top:12px"><summary>¿Cómo se calcula?</summary><p class="sub" style="margin-top:6px">Factor de cierre de cada año = devengado anual ÷ devengado acumulado a fin de ${MESES[mBase].toLowerCase()}; se aplica al devengado de ${CUR} a la misma fecha (${M1(baseCur)}${credDev?' sin operaciones de crédito':''}). El segundo método suma a ese devengado el gasto que cada año se hizo de ${MESES[mBase+1].toLowerCase()} a diciembre, medido como % de su PIM. Ambos se limitan al PIM. El rango de escenarios va del valor más bajo al más alto entre los factores de cierre de cada año y el segundo método. Los métodos históricos parten del devengado a fin de ${MESES[mBase].toLowerCase()}, de modo que el gasto parcial del mes en curso no se suma dos veces. Usan los mismos años, por lo que no son evidencias independientes, y los porcentajes de años anteriores usan su PIM final (comparación retrospectiva). Los métodos de ritmo suman el promedio mensual por los ${mesesRest.toFixed(2)} meses que faltan, sin el repunte de diciembre.${credDev?` Los dos métodos históricos excluyen el rubro 19 (operaciones oficiales de crédito) en todos los años, y a cada resultado se suma el devengado de ese rubro registrado en ${CUR} al corte (${M1(credDev)}).`:''}</p></details>
   </section>
   <footer>Reporte generado con datos públicos del MEF (Datos Abiertos). Montos en soles. Los escenarios de cierre no son pronósticos; las diferencias entre fases y entre presupuesto e ingreso son señales para revisar, no causas comprobadas.</footer>`;
 }
