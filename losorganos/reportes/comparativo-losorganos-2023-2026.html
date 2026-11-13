@@ -373,12 +373,32 @@ function renderEvolucion(){
   const pR=Math.min(pimCur,tv(CUR)[DEV]+ritmo*mesesRest), pR3=Math.min(pimCur,tv(CUR)[DEV]+ritmo3*mesesRest);
   const novdicSh=CLOSED.map(y=>ratio(X[y].v[DEV]-accX(y,mBase),X[y].v[PIM]));
   const projSh=Math.min(pimX, baseCur+avg(novdicSh)*pimX)+credDev;
-  const central=(projAvg+projSh)/2, lo=Math.min(projMin,projSh), hi=Math.max(projMax,projSh);
+  // Método calibrado con la prueba nacional (unas 1 900 municipalidades, 2024–2025; nucleo/datos/calibracion.json):
+  // escenario central = promedio de cuatro métodos; rango = errores observados en esa prueba (percentiles 10 y 90).
+  const CAL={
+ "metodo": "promedio de cuatro métodos (factor, % del PIM, % de lo que falta, ritmo de 3 meses)",
+ "q10": -0.2291,
+ "q90": 0.328,
+ "n": 3816,
+ "anios": [
+  2024,
+  2025
+ ],
+ "mae_actual": 9.2,
+ "mae_nuevo": 8.0,
+ "cobertura_fuera_de_muestra": 74
+};
+  const restoSh=CLOSED.map(y=>ratio(X[y].v[DEV]-accX(y,mBase), X[y].v[PIM]-accX(y,mBase))).filter(x=>isFinite(x));
+  const capX=v=>Math.min(pimX, Math.max(baseCur, v));
+  const mPost=11-mBase, ritmo3X=avg(X[CUR].dm.slice(Math.max(0,mBase-2),mBase+1));
+  const mF=capX(baseCur*avg(factor)), mS=capX(baseCur+avg(novdicSh)*pimX), mR=capX(baseCur+avg(restoSh)*(pimX-baseCur)), mT=capX(baseCur+ritmo3X*mPost);
+  const projResto=mR+credDev, projRit=mT+credDev, cX=(mF+mS+mR+mT)/4, falta=Math.max(0,pimX-baseCur);
+  const central=cX+credDev, lo=capX(cX+CAL.q10*falta)+credDev, hi=capX(cX+CAL.q90*falta)+credDev;
   const noEjAvg=pimCur-central;
   const novdic=CLOSED.map(y=>ratio(tv(y)[DEV]-accTo(y,mBase),tv(y)[DEV]));
   // Indicadores calculados que reutilizan la portada y el informe (fuente única; ver portal/build_index.py)
   window.__IND = {corte:META.corte, mesBase:MESES[mBase], cur:CUR, closed:CLOSED, pimCur, devCur:tv(CUR)[DEV], baseCur,
-    central, lo, hi, projAvg, projSh, projMin, projMax, pR, pR3, credDev, pimX, saldoAvg, ejAvg, factor, projHist, novdicShAvg:avg(novdicSh), ritmo, ritmo3, mesesRest,
+    central, lo, hi, projAvg, projSh, projResto, projRit, restoShAvg:avg(restoSh), ritmo3X, mPost, q10:CAL.q10, q90:CAL.q90, calN:CAL.n, calCob:CAL.cobertura_fuera_de_muestra, projMin, projMax, pR, pR3, credDev, pimX, saldoAvg, ejAvg, factor, projHist, novdicShAvg:avg(novdicSh), ritmo, ritmo3, mesesRest,
     finMes:Object.fromEntries(YEARS.map(y=>[y, ratio(accTo(y,mBase), tv(y)[PIM])])),
     finMesProm: avg(CLOSED.map(y=>ratio(accTo(y,mBase), tv(y)[PIM]))),
     pia:Object.fromEntries(YEARS.map(y=>[y,tv(y)[PIA]])), pim:Object.fromEntries(YEARS.map(y=>[y,tv(y)[PIM]])), dev:Object.fromEntries(YEARS.map(y=>[y,tv(y)[DEV]]))};
@@ -391,7 +411,7 @@ function renderEvolucion(){
     <div class="kpi"><div class="lab">PIA promedio ${YEARS[0]}–${CUR}</div><div class="v num">${M1(piaAvg)}</div><p>Presupuesto de apertura por año (${YEARS.map(y=>`${y}: ${M1(tv(y)[PIA])}`).join(' · ')})</p></div>
     <div class="kpi"><div class="lab">PIM promedio ${CLOSED[0]}–${CLOSED[CLOSED.length-1]}</div><div class="v num">${M1(pimAvgC)}</div><p>${pts(ratio(pimAvgC-avg(CLOSED.map(y=>tv(y)[PIA])),avg(CLOSED.map(y=>tv(y)[PIA]))))} % sobre el PIA promedio. Con ${CUR}: ${M1(pimAvgAll)}</p></div>
     <div class="kpi"><div class="lab">Ejecución promedio (años cerrados)</div><div class="v num">${P1(ejAvg)}</div><p>${CLOSED.map((y,i)=>`${y}: ${P1(ejC[i])}`).join(' · ')}</p></div>
-    <div class="kpi warn"><div class="lab">${CUR}: saldo no devengado (escenario central)</div><div class="v num" style="color:var(--red)">${M1(noEjAvg)}</div><p>${P1(ratio(noEjAvg,pimCur))} del PIM ${CUR} si noviembre y diciembre repiten ${CLOSED.join(', ')}. Escenarios de mayor y menor ejecución: ${M1(pimCur-hi)} a ${M1(pimCur-lo)}. Supone el PIM actual.</p></div>
+    <div class="kpi warn"><div class="lab">${CUR}: saldo no devengado (escenario central)</div><div class="v num" style="color:var(--red)">${M1(noEjAvg)}</div><p>${P1(ratio(noEjAvg,pimCur))} del PIM ${CUR} si noviembre y diciembre repiten ${CLOSED.join(', ')}. Rango de referencia: ${M1(pimCur-hi)} a ${M1(pimCur-lo)}. Supone el PIM actual.</p></div>
   </section>
 
   <section class="card">
@@ -419,28 +439,29 @@ function renderEvolucion(){
 
   <section class="card">
     <h2>${CUR}: ¿cuánto se dejará de ejecutar?</h2>
-    <p class="sub">La entidad concentra mucho gasto en noviembre y, sobre todo, en diciembre (${CLOSED.map((y,i)=>`${y}: ${P1(novdic[i])} del gasto anual`).join(' · ')}). Por eso los escenarios principales repiten ese comportamiento y no solo el ritmo de los meses anteriores. Son escenarios, no pronósticos: suponen que el PIM actual no cambia hasta el cierre.${credDev?` Las operaciones oficiales de crédito (CIPRL, bonos) se tratan aparte: su devengado sigue el cronograma de la obra financiada, no el ritmo de gasto de la entidad, así que cada escenario suma lo ya devengado con ese rubro (${M1(credDev)}) y no proyecta el resto de su PIM.`:''}</p>
+    <p class="sub">La entidad concentra mucho gasto en noviembre y, sobre todo, en diciembre (${CLOSED.map((y,i)=>`${y}: ${P1(novdic[i])} del gasto anual`).join(' · ')}). Por eso el escenario central combina métodos que repiten ese comportamiento con el ritmo de los últimos meses. Son escenarios, no pronósticos: suponen que el PIM actual no cambia hasta el cierre.${credDev?` Las operaciones oficiales de crédito (CIPRL, bonos) se tratan aparte: su devengado sigue el cronograma de la obra financiada, no el ritmo de gasto de la entidad, así que cada escenario suma lo ya devengado con ese rubro (${M1(credDev)}) y no proyecta el resto de su PIM.`:''}</p>
     <div class="tbl-wrap"><table><thead><tr><th>Método</th><th class="r">Devengado al 31/12</th><th class="r">Ejecución</th><th class="r">Saldo no devengado</th></tr></thead><tbody>
-      <tr class="hl"><td><b>Escenario central</b><div class="sub" style="margin:0;font-size:12px">promedio de los dos métodos siguientes</div></td><td class="r num">${M1(central)}</td><td class="r num">${P1(ratio(central,pimCur))}</td><td class="r num" style="color:var(--red);font-weight:700">${M1(pimCur-central)}</td></tr>
+      <tr class="hl"><td><b>Escenario central</b><div class="sub" style="margin:0;font-size:12px">promedio de los cuatro métodos siguientes</div></td><td class="r num">${M1(central)}</td><td class="r num">${P1(ratio(central,pimCur))}</td><td class="r num" style="color:var(--red);font-weight:700">${M1(pimCur-central)}</td></tr>
       <tr><td>Factor de cierre: devengado a fin de ${MESES[mBase].toLowerCase()}${credDev?' sin operaciones de crédito':''} × ${avg(factor).toFixed(2)}${credDev?' + '+M1(credDev)+' de crédito':''}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ×${factor[i].toFixed(2)}`).join(' · ')}</div></td><td class="r num">${M1(projAvg)}</td><td class="r num">${P1(ratio(projAvg,pimCur))}</td><td class="r num">${M1(pimCur-projAvg)}</td></tr>
       <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM: ${P1(avg(novdicSh))}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ${P1(novdicSh[i])}`).join(' · ')}</div></td><td class="r num">${M1(projSh)}</td><td class="r num">${P1(ratio(projSh,pimCur))}</td><td class="r num">${M1(pimCur-projSh)}</td></tr>
-      <tr><td>Escenario de mayor ejecución (como el mejor cierre: ×${Math.max(...factor).toFixed(2)})</td><td class="r num">${M1(projMax)}</td><td class="r num">${P1(ratio(projMax,pimCur))}</td><td class="r num">${M1(pimCur-projMax)}</td></tr>
-      <tr><td>Escenario de menor ejecución (como el peor cierre: ×${Math.min(...factor).toFixed(2)})</td><td class="r num">${M1(projMin)}</td><td class="r num">${P1(ratio(projMin,pimCur))}</td><td class="r num">${M1(pimCur-projMin)}</td></tr>
-      <tr><td class="sub">Sin repunte de fin de año: ritmo promedio de ${CUR} (${M1(ritmo)}/mes)</td><td class="r num sub">${M1(pR)}</td><td class="r num sub">${P1(ratio(pR,pimCur))}</td><td class="r num sub">${M1(pimCur-pR)}</td></tr>
-      <tr><td class="sub">Sin repunte de fin de año: ritmo de los últimos 3 meses (${M1(ritmo3)}/mes)</td><td class="r num sub">${M1(pR3)}</td><td class="r num sub">${P1(ratio(pR3,pimCur))}</td><td class="r num sub">${M1(pimCur-pR3)}</td></tr>
+      <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % de lo que faltaba devengar: ${P1(avg(restoSh))}<div class="sub" style="margin:0;font-size:12px">${CLOSED.map((y,i)=>`${y}: ${P1(restoSh[i])}`).join(' · ')}</div></td><td class="r num">${M1(projResto)}</td><td class="r num">${P1(ratio(projResto,pimCur))}</td><td class="r num">${M1(pimCur-projResto)}</td></tr>
+      <tr><td>Ritmo de los tres últimos meses (${M1(ritmo3X)}/mes) por ${mPost} meses</td><td class="r num">${M1(projRit)}</td><td class="r num">${P1(ratio(projRit,pimCur))}</td><td class="r num">${M1(pimCur-projRit)}</td></tr>
+      <tr><td>Rango de referencia: mayor ejecución<div class="sub" style="margin:0;font-size:12px">central + percentil 90 de los errores de la prueba nacional</div></td><td class="r num">${M1(hi)}</td><td class="r num">${P1(ratio(hi,pimCur))}</td><td class="r num">${M1(pimCur-hi)}</td></tr>
+      <tr><td>Rango de referencia: menor ejecución<div class="sub" style="margin:0;font-size:12px">central + percentil 10 de los errores de la prueba nacional</div></td><td class="r num">${M1(lo)}</td><td class="r num">${P1(ratio(lo,pimCur))}</td><td class="r num">${M1(pimCur-lo)}</td></tr>
     </tbody></table></div>
     <h3 style="margin-top:14px">¿Cómo se construyen los escenarios?</h3>
     <div class="tbl-wrap"><table><thead><tr><th>Método</th><th>Corte y base</th><th class="r">Factor o % aplicado</th><th class="r">Resultado</th><th>Uso</th></tr></thead><tbody>
-      ${CLOSED.map((y,i)=>`<tr><td>Factor de cierre ${y}</td><td>Devengado a fin de ${MESES[mBase].toLowerCase()} ${CUR}${credDev?' sin operaciones de crédito':''}: ${M1(baseCur)}${credDev?' (+ '+M1(credDev)+' de crédito)':''}</td><td class="r num">×${factor[i].toFixed(3)}</td><td class="r num">${M1(projHist[i])}${baseCur*factor[i]>pimX?' (limitado al PIM)':''}</td><td>Candidato a extremo; entra al promedio de factores</td></tr>`).join('')}
-      <tr><td>Promedio de los factores</td><td>—</td><td class="r num">—</td><td class="r num">${M1(projAvg)}</td><td>Entra al escenario central</td></tr>
-      <tr><td>Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM</td><td>${M1(baseCur)} + % × PIM ${CUR}${credDev?' sin operaciones de crédito':''} (${M1(pimX)})${credDev?' + '+M1(credDev)+' de crédito':''}</td><td class="r num">${P1(avg(novdicSh))}</td><td class="r num">${M1(projSh)}</td><td>Entra al escenario central; candidato a extremo</td></tr>
-      <tr class="hl"><td><b>Escenario central</b></td><td colspan="2">(promedio de factores + segundo método) ÷ 2</td><td class="r num"><b>${M1(central)}</b></td><td>${P1(ratio(central,pimCur))} del PIM</td></tr>
-      <tr><td>Escenario de menor ejecución</td><td colspan="2">mínimo entre los tres factores y el segundo método</td><td class="r num">${M1(lo)}</td><td>${P1(ratio(lo,pimCur))} del PIM</td></tr>
-      <tr><td>Escenario de mayor ejecución</td><td colspan="2">máximo entre los tres factores y el segundo método</td><td class="r num">${M1(hi)}</td><td>${P1(ratio(hi,pimCur))} del PIM</td></tr>
+      ${CLOSED.map((y,i)=>`<tr><td>Factor de cierre ${y}</td><td>Devengado a fin de ${MESES[mBase].toLowerCase()} ${CUR}${credDev?' sin operaciones de crédito':''}: ${M1(baseCur)}${credDev?' (+ '+M1(credDev)+' de crédito)':''}</td><td class="r num">×${factor[i].toFixed(3)}</td><td class="r num">${M1(projHist[i])}${baseCur*factor[i]>pimX?' (limitado al PIM)':''}</td><td>Entra al promedio de factores</td></tr>`).join('')}
+      <tr><td>1. Promedio de los factores</td><td>—</td><td class="r num">×${avg(factor).toFixed(3)}</td><td class="r num">${M1(projAvg)}</td><td>Entra al escenario central</td></tr>
+      <tr><td>2. Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % del PIM</td><td>${M1(baseCur)} + % × PIM ${CUR}${credDev?' sin operaciones de crédito':''} (${M1(pimX)})</td><td class="r num">${P1(avg(novdicSh))}</td><td class="r num">${M1(projSh)}</td><td>Entra al escenario central</td></tr>
+      <tr><td>3. Gasto de ${MESES[mBase+1].toLowerCase()}–dic como % de lo que faltaba</td><td>${M1(baseCur)} + % × (PIM − devengado)</td><td class="r num">${P1(avg(restoSh))}</td><td class="r num">${M1(projResto)}</td><td>Entra al escenario central</td></tr>
+      <tr><td>4. Ritmo de los tres últimos meses</td><td>${M1(baseCur)} + ${M1(ritmo3X)} × ${mPost}</td><td class="r num">—</td><td class="r num">${M1(projRit)}</td><td>Entra al escenario central</td></tr>
+      <tr class="hl"><td><b>Escenario central</b></td><td colspan="2">promedio de los métodos 1 a 4</td><td class="r num"><b>${M1(central)}</b></td><td>${P1(ratio(central,pimCur))} del PIM</td></tr>
+      <tr><td>Rango de referencia</td><td colspan="2">central ${(100*CAL.q10).toFixed(1)} % / +${(100*CAL.q90).toFixed(1)} % de lo que falta devengar (percentiles 10 y 90 de la prueba nacional)</td><td class="r num">${M1(lo)} / ${M1(hi)}</td><td>${P1(ratio(lo,pimCur))} / ${P1(ratio(hi,pimCur))}</td></tr>
     </tbody></table></div>
-    <p class="sub" style="font-size:12px">Se usan los valores sin redondear. El PIM de cierre se supone igual al vigente; ningún resultado puede superarlo. Son escenarios descriptivos, no probabilidades ni intervalos de confianza.</p>
-    <div class="alert">En el escenario central, ${CUR} cerraría con <b>${P1(ratio(central,pimCur))}</b> de ejecución y un saldo no devengado de <b>${M1(pimCur-central)}</b>; entre los escenarios de mayor y menor ejecución, de ${M1(pimCur-hi)} a ${M1(pimCur-lo)}. Es ${M1(Math.abs(pimCur-central-saldoAvg))} ${pimCur-central>saldoAvg?'más':'menos'} que el promedio de los años cerrados (${M1(saldoAvg)} por año).</div>
-    <details style="margin-top:12px"><summary>¿Cómo se calcula?</summary><p class="sub" style="margin-top:6px">Factor de cierre de cada año = devengado anual ÷ devengado acumulado a fin de ${MESES[mBase].toLowerCase()}; se aplica al devengado de ${CUR} a la misma fecha (${M1(baseCur)}${credDev?' sin operaciones de crédito':''}). El segundo método suma a ese devengado el gasto que cada año se hizo de ${MESES[mBase+1].toLowerCase()} a diciembre, medido como % de su PIM. Ambos se limitan al PIM. El rango de escenarios va del valor más bajo al más alto entre los factores de cierre de cada año y el segundo método. Los métodos históricos parten del devengado a fin de ${MESES[mBase].toLowerCase()}, de modo que el gasto parcial del mes en curso no se suma dos veces. Usan los mismos años, por lo que no son evidencias independientes, y los porcentajes de años anteriores usan su PIM final (comparación retrospectiva). Los métodos de ritmo suman el promedio mensual por los ${mesesRest.toFixed(2)} meses que faltan, sin el repunte de diciembre.${credDev?` Los dos métodos históricos excluyen el rubro 19 (operaciones oficiales de crédito) en todos los años, y a cada resultado se suma el devengado de ese rubro registrado en ${CUR} al corte (${M1(credDev)}).`:''}</p></details>
+    <p class="sub" style="font-size:12px">Se usan los valores sin redondear. El PIM de cierre se supone igual al vigente; ningún resultado puede superarlo. El rango sale de los errores observados al aplicar el mismo método a unas 1 900 municipalidades en 2024 y 2025: fuera de esa muestra, el cierre real cayó dentro del rango en alrededor de 3 de cada 4 casos.</p>
+    <div class="alert">En el escenario central, ${CUR} cerraría con <b>${P1(ratio(central,pimCur))}</b> de ejecución y un saldo no devengado de <b>${M1(pimCur-central)}</b>; en el rango de referencia, de ${M1(pimCur-hi)} a ${M1(pimCur-lo)}. Es ${M1(Math.abs(pimCur-central-saldoAvg))} ${pimCur-central>saldoAvg?'más':'menos'} que el promedio de los años cerrados (${M1(saldoAvg)} por año).</div>
+    <details style="margin-top:12px"><summary>¿Cómo se calcula?</summary><p class="sub" style="margin-top:6px">El escenario central promedia cuatro métodos aplicados al devengado a fin de ${MESES[mBase].toLowerCase()} (${M1(baseCur)}${credDev?' sin operaciones de crédito':''}): (1) factor de cierre = devengado anual ÷ devengado a fin de ${MESES[mBase].toLowerCase()} de cada año cerrado; (2) gasto de ${MESES[mBase+1].toLowerCase()} a diciembre como % del PIM; (3) ese mismo gasto como % de lo que faltaba devengar; (4) ritmo de los tres últimos meses. Todos se limitan al PIM. Se eligió este promedio porque, aplicado a unas 1 900 municipalidades en 2024 y 2025, se equivocó menos que el método anterior (error medio de ${CAL.mae_nuevo} puntos frente a ${CAL.mae_actual}). El rango suma al central los percentiles 10 y 90 de esos errores, medidos como parte de lo que faltaba devengar. Los porcentajes de años anteriores usan su PIM final (comparación retrospectiva).${credDev?` Los métodos excluyen el rubro 19 (operaciones oficiales de crédito) en todos los años, y a cada resultado se suma el devengado de ese rubro registrado en ${CUR} al corte (${M1(credDev)}).`:''}</p></details>
   </section>
   <footer>Reporte generado con datos públicos del MEF (Datos Abiertos). Montos en soles. Los escenarios de cierre no son pronósticos; las diferencias entre fases y entre presupuesto e ingreso son señales para revisar, no causas comprobadas.</footer>`;
 }
