@@ -201,6 +201,16 @@ footer .wrap{padding-block:20px 40px;color:var(--muted);font-size:13px;display:g
 /* —— lectura por niveles (estilo Ministro al Día): inicio, pestañas y vistas —— */
 .meta-cab{margin-top:10px!important;font:500 12.5px var(--f-mono)!important;color:var(--navy-muted)}
 header.band{border-bottom:4px solid var(--gold)}
+.cab2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px 32px;align-items:center}
+.cab2 h1{font:700 clamp(22px,2.9vw,32px)/1.2 var(--f-display);margin:10px 0 8px;max-width:36ch;text-wrap:balance}
+.desc-cab{display:grid;gap:10px;min-width:250px}
+.desc-cab .dc{display:grid;gap:3px}
+.desc-cab a.b-oro,.desc-cab a.b-sec{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;text-decoration:none;font:700 15px/1.2 var(--f-text)}
+.desc-cab a.b-oro{background:var(--gold);color:#1d2433}
+.desc-cab a.b-sec{background:rgba(255,255,255,.08);color:var(--navy-ink);border:1px solid rgba(255,255,255,.28);font-weight:600;font-size:14px;padding:9px 16px}
+.desc-cab small{font:500 11.5px var(--f-mono);opacity:.8;white-space:nowrap}
+.desc-cab a.vl{font-size:12.5px;color:var(--navy-muted);text-align:right;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:760px){.cab2{grid-template-columns:1fr;gap:12px}.desc-cab{grid-template-columns:1fr 1fr;min-width:0;gap:8px}.desc-cab a.b-oro,.desc-cab a.b-sec{flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;font-size:14px}.desc-cab a.vl{text-align:left}}
 nav.pestanas{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
 nav.pestanas .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
 nav.pestanas a{flex:none;text-decoration:none;color:var(--navy);font:600 13.5px var(--f-text);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);min-height:44px;display:flex;align-items:center}
@@ -301,12 +311,14 @@ em.tipo-f.t-meta{background:#fbeccc;color:#7a4d0b} em.tipo-f.t-calculada{backgro
 @media (hover:hover) and (pointer:fine){.ir:hover,.leer:hover,.ir-sec a:hover{filter:brightness(1.08)} .leer:hover,.ir-sec a:hover{border-color:var(--gold)}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
-<header class="band"><div class="wrap">
-<div class="eyebrow">Municipalidad Distrital de Aguas Verdes · plataforma independiente, no es un sitio oficial</div>
-<h1>Análisis presupuestal y gestión local 2023–2026</h1>
-<p>Qué recibe la próxima gestión, sus principales riesgos y qué hacer en los primeros días.</p>
-<p class="meta-cab">Presupuesto con datos al 13/11/2026 · publicado por el MEF el 14/11/2026 · cada sección indica su fecha</p>
-<p class="ayuda-gl">¿No conoce un término? Las palabras <span class="gl-muestra">subrayadas con puntos</span> muestran su significado; también puede ver el <a href="#glosario" onclick="var g=document.getElementById('glosario');if(g)g.open=true;">glosario</a>.</p>
+<header class="band"><div class="wrap cab2">
+<div class="cab-txt"><div class="eyebrow">Municipalidad Distrital de Aguas Verdes · análisis presupuestal y gestión local 2023–2026 · plataforma independiente, no es un sitio oficial</div>
+<h1>2026 va muy por detrás de 2025 y su presupuesto incluye canon que, según la estimación, no llegaría.</h1>
+<p class="meta-cab">Presupuesto con datos al 13/11/2026 · publicado por el MEF el 14/11/2026 · cada sección indica su fecha</p></div>
+<div class="desc-cab" aria-label="Informes para descargar">
+<div class="dc"><a class="b-oro" href="ejecutivo/Informe_ejecutivo_MD_Aguas_Verdes_2026.pdf" download>Descargar informe ejecutivo<small>PDF · 1 hoja</small></a><a class="vl" href="ejecutivo/informe-ejecutivo.html">ver en línea</a></div>
+<div class="dc"><a class="b-sec" href="informe/Informe_detallado_MD_Aguas_Verdes_2023-2026.pdf" download>Informe detallado<small>PDF</small></a><a class="vl" href="informe/informe-detallado.html">ver en línea</a></div>
+</div>
 </div></header>
 <nav class="pestanas" aria-label="Secciones"><div class="wrap"><a href="#inicio" class=prim>Inicio</a><a href="dia/" class="dia">Día por día 2026</a><a href="#presupuesto">Presupuesto 2026</a><a href="#historico">Cuatro años</a><a href="#pares">Comparación</a><a href="#ingresos">Ingresos</a><a href="#deuda">Deuda</a><a href="#nino">El Niño</a><a href="#ruta30">Ruta 30 días</a><a href="#liquidez">Liquidez</a></div></nav>
 <main>
@@ -333,12 +345,6 @@ em.tipo-f.t-meta{background:#fbeccc;color:#7a4d0b} em.tipo-f.t-calculada{backgro
 <ol class="hacer"><li><time>01–05/01</time><span>Confirmar el decreto que continúe la emergencia por lluvias en Aguas Verdes</span><em class="tipo-f t-calculada">Fecha calculada · por confirmar</em></li><li><time>05/01</time><span>Incluir en el PIA 2027 la actividad de emergencia y la preparación ante lluvias: kits, brigadas, monitoreo y quebradas</span><em class="tipo-f t-meta">Meta interna propuesta</em></li><li><time>05/01</time><span>Acreditar a los responsables de las cuentas bancarias ante el Tesoro Público</span><em class="tipo-f t-plazo">Plazo según norma</em></li><li><time>05/01</time><span>Presentar el PIA 2027 a la DGPP (y aprobarlo por resolución de alcaldía si el concejo saliente no lo hizo)</span><em class="tipo-f t-plazo">Plazo según norma</em></li><li><time>05/01</time><span>Aprobar el PIA 2027 con las estimaciones de ingresos del MEF</span><em class="tipo-f t-meta">Meta interna propuesta</em></li></ol>
 <a class="ir" href="#ruta30"><span>Ver la Ruta de los primeros 30 días</span><span aria-hidden="true">→</span></a>
 <div class="ir-control"><span><b>Cómo va el 2026 día por día.</b> Días que quedan, cuánto hay que gastar por semana frente a lo que se gasta, saldos por fuente y obras sin gasto. Se actualiza cuando el MEF publica datos nuevos.</span><a href="dia/">Ver el día por día</a></div>
-<a id="informe" class="informe" href="ejecutivo/informe-ejecutivo.html">
-<div class="inf-txt"><span class="eyebrow">Informe ejecutivo · para el próximo alcalde</span>
-<b>2026 va muy por detrás de 2025 y su presupuesto incluye canon que, según la estimación, no llegaría. ¿Cómo recibirá usted la municipalidad?</b>
-<span class="inf-sub">Lo esencial del análisis 2023–2026 en una sola hoja, sin tecnicismos y listo para imprimir.</span></div>
-<span class="inf-btn">Ver informe ejecutivo <span aria-hidden="true">→</span></span></a>
-<a class="resumen-link" href="informe/informe-detallado.html"><b>Informe detallado</b><span>El análisis completo, con cifras, gráficos y un anexo de cálculo →</span></a>
 </div></section>
 <section id="presupuesto" class="vista"><div class="wrap">
 <div class="sec-cab"><h2>Presupuesto 2026</h2><span class="corte">Al 13/11/2026 · día 317 de 365</span></div>
