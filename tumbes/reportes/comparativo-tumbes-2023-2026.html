@@ -190,6 +190,12 @@ main .wrap{grid-template-columns:minmax(0,1fr)}
 }
 @media print{.chart-scroll::after{display:none}}
 
+/* —— estilo Ministro al Día: cifras en sans serif con números tabulares, regla dorada y cabecera con borde —— */
+header,.top,.hero-band{border-bottom:4px solid #d7a03a}
+.big,.fstep .v,.att .amt,.kpi .v,.v{font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif!important;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.015em}
+h2::before{content:"";display:block;width:40px;height:3px;background:#d7a03a;margin:0 0 10px}
+.card,.panel,.kpi{box-shadow:0 1px 0 rgba(19,41,75,.04),0 8px 24px -20px rgba(19,41,75,.35)}
+
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:480px){.kpis{grid-template-columns:1fr}}
@@ -205,6 +211,12 @@ td.bl{border-left:1px solid var(--line)}
 tr.tot td{font-weight:700;background:var(--soft)}
 .legend-y i{border-radius:50%}
 th{white-space:normal;vertical-align:bottom}
+
+/* —— estilo Ministro al Día: cifras en sans serif con números tabulares, regla dorada y cabecera con borde —— */
+header,.top,.hero-band{border-bottom:4px solid #d7a03a}
+.big,.fstep .v,.att .amt,.kpi .v,.v{font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif!important;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.015em}
+h2::before{content:"";display:block;width:40px;height:3px;background:#d7a03a;margin:0 0 10px}
+.card,.panel,.kpi{box-shadow:0 1px 0 rgba(19,41,75,.04),0 8px 24px -20px rgba(19,41,75,.35)}
 </style></head><body>
 
 <header class="band">
