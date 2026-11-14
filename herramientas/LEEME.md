@@ -23,3 +23,19 @@ La tarea necesita leer el núcleo privado `AlcaldealdIA/kronos-nucleo`. Se le da
 3. *Actions* → *Actualizar portales municipales* → *Run workflow*: la primera corrida debe terminar en verde.
 
 (Alternativa: una clave SSH de despliegue de solo lectura en kronos-nucleo, guardada aquí como `KRONOS_DEPLOY_KEY`.)
+
+## Cambio de año
+
+- Cada entidad de `herramientas/municipios.json` tiene su ejercicio («anio»). La tarea descarga el archivo de ese año,
+  no el del calendario: en enero sigue leyendo el archivo del año que cerró.
+- Las publicaciones de enero del archivo del año cerrado se guardan con corte 31/12 (cifras revisadas del cierre). El día
+  por día muestra «El año terminó el 31/12» y no cuenta días por delante.
+- Para empezar el nuevo ejercicio: agregar el año en `anios` de `entidades/<id>/entidad.json` (kronos-nucleo) y cambiar
+  «anio» aquí, en la misma fecha.
+
+## Estado de la consulta
+
+- Si no se puede consultar al MEF, la tarea termina con error. La página del día por día lo muestra como «no se pudo
+  verificar si hay datos más recientes», no como «sin novedades».
+- El reloj de la página lee el estado real de la tarea en GitHub: dice «Consultando al MEF» solo cuando hay una corrida en
+  curso.

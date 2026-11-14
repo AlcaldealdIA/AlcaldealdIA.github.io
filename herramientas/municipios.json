@@ -1,7 +1,7 @@
 {
- "zarumilla": {"nombre": "Municipalidad Provincial de Zarumilla", "slug": "zarumilla", "automatico": true},
- "tumbes": {"nombre": "Municipalidad Provincial de Tumbes", "slug": "tumbes", "automatico": true},
- "aguasverdes": {"nombre": "Municipalidad Distrital de Aguas Verdes", "slug": "aguasverdes", "automatico": true},
- "losorganos": {"nombre": "Municipalidad Distrital de Los Órganos", "slug": "losorganos", "automatico": true},
- "sanisidro": {"nombre": "Municipalidad Distrital de San Isidro", "slug": "sanisidro", "automatico": true}
+ "zarumilla": {"nombre": "Municipalidad Provincial de Zarumilla", "slug": "zarumilla", "automatico": true, "anio": 2026},
+ "tumbes": {"nombre": "Municipalidad Provincial de Tumbes", "slug": "tumbes", "automatico": true, "anio": 2026},
+ "aguasverdes": {"nombre": "Municipalidad Distrital de Aguas Verdes", "slug": "aguasverdes", "automatico": true, "anio": 2026},
+ "losorganos": {"nombre": "Municipalidad Distrital de Los Órganos", "slug": "losorganos", "automatico": true, "anio": 2026},
+ "sanisidro": {"nombre": "Municipalidad Distrital de San Isidro", "slug": "sanisidro", "automatico": true, "anio": 2026}
 }

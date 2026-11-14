@@ -21,8 +21,9 @@ on:
         type: string
         default: ""
 
+# Mínimo privilegio: lectura por defecto; solo el trabajo que publica puede escribir.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: portales-municipales
@@ -45,14 +46,21 @@ jobs:
       - run: pip install -q requests
       - name: ¿El MEF publicó algo nuevo?
         id: mef
+        env:
+          FORZAR: ${{ (github.event_name == 'workflow_dispatch' && inputs.forzar) && '--forzar' || '' }}
+          PEDIDA: ${{ inputs.entidad }}
+        # la entidad pedida se pasa como dato (variable entrecomillada) y vigilar_municipal.py la valida contra municipios.json
         run: |
-          python herramientas/vigilar_municipal.py ${{ (github.event_name == 'workflow_dispatch' && inputs.forzar) && '--forzar' || '' }} ${{ inputs.entidad }}
+          args=(); [ -n "$FORZAR" ] && args+=("--forzar"); [ -n "$PEDIDA" ] && args+=("$PEDIDA")
+          python herramientas/vigilar_municipal.py "${args[@]}"
 
   actualizar:
     needs: vigilar
     if: needs.vigilar.outputs.novedad == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    permissions:
+      contents: write
     env:
       HAY_CLAVE: ${{ secrets.KRONOS_DEPLOY_KEY != '' }}
       HAY_TOKEN: ${{ secrets.KRONOS_TOKEN != '' }}
@@ -93,6 +101,9 @@ jobs:
           pip install -q -r kronos/requirements.txt requests
           cd kronos/nucleo/pdf && npm ci --silent && npx playwright install --with-deps chromium >/dev/null
           sudo apt-get install -y -qq poppler-utils >/dev/null || true
+      - name: Pruebas del día por día (si fallan, no se calcula ni se publica nada)
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
+        run: python kronos/nucleo/control/pruebas_dia.py
       - name: Descargar los datos del año (una sola lectura de los archivos del MEF)
         if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: python kronos/nucleo/datos/descargar_municipal.py $ENTS --anio $ANIO
