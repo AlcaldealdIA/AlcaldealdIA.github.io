@@ -1,0 +1,7 @@
+{
+ "zarumilla": {"nombre": "Municipalidad Provincial de Zarumilla", "slug": "zarumilla", "automatico": true},
+ "tumbes": {"nombre": "Municipalidad Provincial de Tumbes", "slug": "tumbes", "automatico": false},
+ "aguasverdes": {"nombre": "Municipalidad Distrital de Aguas Verdes", "slug": "aguasverdes", "automatico": false},
+ "losorganos": {"nombre": "Municipalidad Distrital de Los Órganos", "slug": "losorganos", "automatico": false},
+ "sanisidro": {"nombre": "Municipalidad Distrital de San Isidro", "slug": "sanisidro", "automatico": false}
+}

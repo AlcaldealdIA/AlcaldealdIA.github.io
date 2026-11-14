@@ -1,0 +1,121 @@
+name: Actualizar portales municipales
+
+# Sigue el ritmo del MEF: cada hora, de 7:23 a 23:23 (hora de Lima), una revisión liviana pregunta si el archivo diario
+# de gasto de Datos Abiertos cambió. Solo si hay novedad se descarga, se calcula, se verifica y se publica.
+# Entidades: herramientas/municipios.json («automatico»: true).
+# Requiere un acceso de solo lectura al repositorio privado AlcaldealdIA/kronos-nucleo, guardado como secreto del sitio:
+# KRONOS_TOKEN (token de acceso con permiso «Contents: Read-only» sobre kronos-nucleo) o KRONOS_DEPLOY_KEY (clave SSH de despliegue).
+# Pasos en herramientas/LEEME.md.
+on:
+  schedule:
+    - cron: "23 12-23 * * *"   # 7:23 a 18:23 hora de Lima
+    - cron: "23 0-4 * * *"     # 19:23 a 23:23 hora de Lima
+  workflow_dispatch:
+    inputs:
+      forzar:
+        description: "Actualizar aunque el MEF no haya publicado nada nuevo"
+        type: boolean
+        default: true
+      entidad:
+        description: "Solo esta entidad (su clave en municipios.json, por ejemplo zarumilla). Vacío = todas las automáticas"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portales-municipales
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      novedad: ${{ steps.mef.outputs.novedad }}
+      entidades: ${{ steps.mef.outputs.entidades }}
+      anio: ${{ steps.mef.outputs.anio }}
+      publicado: ${{ steps.mef.outputs.publicado }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests
+      - name: ¿El MEF publicó algo nuevo?
+        id: mef
+        run: |
+          python herramientas/vigilar_municipal.py ${{ (github.event_name == 'workflow_dispatch' && inputs.forzar) && '--forzar' || '' }} ${{ inputs.entidad }}
+
+  actualizar:
+    needs: vigilar
+    if: needs.vigilar.outputs.novedad == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      HAY_CLAVE: ${{ secrets.KRONOS_DEPLOY_KEY != '' }}
+      HAY_TOKEN: ${{ secrets.KRONOS_TOKEN != '' }}
+      ENTS: ${{ needs.vigilar.outputs.entidades }}
+      ANIO: ${{ needs.vigilar.outputs.anio }}
+    steps:
+      - name: Falta el acceso al núcleo
+        if: env.HAY_CLAVE != 'true' && env.HAY_TOKEN != 'true'
+        run: |
+          echo "::error::Falta el secreto KRONOS_TOKEN (o KRONOS_DEPLOY_KEY): no se puede leer el núcleo privado. Ver herramientas/LEEME.md"
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          path: sitio
+      - name: Traer el núcleo de análisis (repositorio privado, con token)
+        if: env.HAY_TOKEN == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: AlcaldealdIA/kronos-nucleo
+          token: ${{ secrets.KRONOS_TOKEN }}
+          path: kronos
+      - name: Traer el núcleo de análisis (repositorio privado, con clave SSH)
+        if: env.HAY_TOKEN != 'true' && env.HAY_CLAVE == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: AlcaldealdIA/kronos-nucleo
+          ssh-key: ${{ secrets.KRONOS_DEPLOY_KEY }}
+          path: kronos
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Instalar dependencias
+        run: |
+          pip install -q -r kronos/requirements.txt requests
+          cd kronos/nucleo/pdf && npm ci --silent && npx playwright install --with-deps chromium >/dev/null
+          sudo apt-get install -y -qq poppler-utils >/dev/null || true
+      - name: Descargar los datos del año (una sola lectura de los archivos del MEF)
+        run: python kronos/nucleo/datos/descargar_municipal.py $ENTS --anio $ANIO
+      - name: Regenerar, verificar y publicar cada portal
+        run: |
+          fallas=""
+          for e in $ENTS; do
+            echo "::group::$e"
+            rc=0; python kronos/nucleo/automatico.py "$e" --sitio sitio --vigilancia || rc=$?
+            echo "::endgroup::"
+            if [ $rc -eq 2 ]; then echo "::warning::$e: solo se actualizó el día por día; el portal espera la aprobación de lecturas o tiene una falta (ver $e/dia/estado_portal.json)"; fi
+            if [ $rc -eq 1 ]; then echo "::warning::$e: no se publicó nada; se conserva la última versión válida"; fallas="$fallas $e"; fi
+          done
+          echo "FALLAS=$fallas" >> "$GITHUB_ENV"
+      - name: Registrar lo que se vio del MEF
+        run: |
+          cd sitio
+          # si alguna entidad no pudo publicarse, no se da por vista la publicación: la próxima revisión vuelve a intentarlo
+          if [ -z "$(echo $FALLAS | tr -d ' ')" ]; then python herramientas/vigilar_municipal.py --guardar "${{ needs.vigilar.outputs.publicado }}"; fi
+      - name: Publicar
+        run: |
+          cd sitio
+          git config user.name "AlcaldealdIA"
+          git config user.email "noreply@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+          git commit -q -m "Portales municipales: datos del MEF publicados el ${{ needs.vigilar.outputs.publicado }}"
+          ok=0; for i in 1 2 3 4 5; do git pull --rebase -q origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && ok=1 && break; git rebase --abort 2>/dev/null || true; sleep $((5 + RANDOM % 20)); done; [ "$ok" = 1 ]
