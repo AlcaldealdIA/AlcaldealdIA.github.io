@@ -188,6 +188,12 @@ main .wrap{grid-template-columns:minmax(0,1fr)}
   table.apila td.largo::before{display:block;margin-bottom:3px}
 }
 @media print{.chart-scroll::after{display:none}}
+
+/* —— estilo Ministro al Día: cifras en sans serif con números tabulares, regla dorada y cabecera con borde —— */
+header,.top,.hero-band{border-bottom:4px solid #d7a03a}
+.big,.fstep .v,.att .amt,.kpi .v,.v{font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif!important;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.015em}
+h2::before{content:"";display:block;width:40px;height:3px;background:#d7a03a;margin:0 0 10px}
+.card,.panel,.kpi{box-shadow:0 1px 0 rgba(19,41,75,.04),0 8px 24px -20px rgba(19,41,75,.35)}
 </style></head><body>
 
 <header class="band">
@@ -264,6 +270,9 @@ const mesCorte = corte.getMonth();  // 0..11; meses completos = mesCorte
 const finAnio = new Date(anio,11,31,23,59);
 const diasRest = Math.max(1,(finAnio - corte)/864e5);
 const semRest = diasRest/7, mesesRest = diasRest/30.4375;
+// días hábiles que quedan (lunes a viernes sin feriados nacionales), mismo criterio que el «día por día»
+const FERIADOS = new Set(['1-1','5-1','6-7','6-29','7-23','7-28','7-29','8-6','8-30','10-8','11-1','12-8','12-9','12-25'].concat(({2025:['4-17','4-18'],2026:['4-2','4-3'],2027:['3-25','3-26']})[anio]||[]));
+const habRest = (()=>{let n=0;const d=new Date(corte.getFullYear(),corte.getMonth(),corte.getDate()+1);while(d<=finAnio){const w=d.getDay();if(w>0&&w<6&&!FERIADOS.has((d.getMonth()+1)+'-'+d.getDate()))n++;d.setDate(d.getDate()+1)}return n})();
 
 // ---------- utilidades ----------
 const $ = (s,el=document)=>el.querySelector(s);
@@ -458,7 +467,7 @@ function renderPanel(){
     PH.minF = capX(cX + CAL.q10*falta) + credDev; PH.maxF = capX(cX + CAL.q90*falta) + credDev;
   }
   const cierre = PH ? PH.central : proy(prom);
-  const semanal = saldo/semRest;
+  const semanal = habRest ? saldo/habRest*5 : saldo;
 
   // saldo por etapa
   const et = [
@@ -494,14 +503,14 @@ function renderPanel(){
       </div>
       <div class="track"><div class="fill" style="width:${Math.min(100,dPct*100)}%"></div><div class="mark" style="left:calc(${ESP*100}% - 1px)" title="Referencia lineal"></div></div>
       <div class="scale"><span>Devengado ${P1(dPct)}</span><span>Referencia lineal ${P1(ESP)}</span><span>100 %</span></div>
-      <div class="note">Para devengar todo el PIM al 31/12 se necesitan <b>${M1(semanal)} por semana</b> (faltan ${M1(saldo)} en ${semRest.toFixed(1)} semanas).</div>
+      <div class="note">Para devengar todo el PIM al 31/12 se necesitan <b>${M1(semanal)} por semana</b> (faltan ${M1(saldo)} en ${habRest} días hábiles, unas ${(habRest/5).toFixed(1)} semanas de trabajo).</div>
       <p class="sub" style="margin:10px 0 0">Certificado: <b>${M1(tv[CER])} (${P1(cPct)})</b> del PIM</p>
     </section>
     <section class="card">
       <div class="lab">Escenario central de cierre</div>
       <div class="big num" style="font-size:44px;margin-top:8px">${P1(ratio(cierre,tv[PIM]))}</div>
       <p class="sub" style="margin:6px 0 0">${M1(cierre)} al 31/12<br><b style="color:var(--red)">Saldo no devengado en este escenario: ${M1(tv[PIM]-cierre)}</b></p>
-      <p class="sub">${PH?`Escenario, no pronóstico: repite el cierre de ${HY}. Menor ejecución ${P1(ratio(PH.minF,tv[PIM]))}; mayor ${P1(ratio(PH.maxF,tv[PIM]))}. Supone el PIM actual. Detalle al final de la página.`:'Al ritmo promedio del año (detalle al final de la página).'}</p>
+      <p class="sub">${PH?`Escenario orientativo, no pronóstico: repite el cierre de ${HY}. Menor ejecución ${P1(ratio(PH.minF,tv[PIM]))}; mayor ${P1(ratio(PH.maxF,tv[PIM]))}. Supone el PIM actual. Detalle al final de la página.`:'Al ritmo promedio del año (detalle al final de la página).'}</p>
     </section>
   </div>
 
