@@ -59,12 +59,11 @@ jobs:
       ENTS: ${{ needs.vigilar.outputs.entidades }}
       ANIO: ${{ needs.vigilar.outputs.anio }}
     steps:
-      - name: Falta el acceso al núcleo
+      - name: Falta el acceso al núcleo (la tarea queda en espera, sin error)
         if: env.HAY_CLAVE != 'true' && env.HAY_TOKEN != 'true'
-        run: |
-          echo "::error::Falta el secreto KRONOS_TOKEN (o KRONOS_DEPLOY_KEY): no se puede leer el núcleo privado. Ver herramientas/LEEME.md"
-          exit 1
+        run: echo "::notice::Falta el secreto KRONOS_TOKEN (o KRONOS_DEPLOY_KEY); no se actualiza nada hasta configurarlo. Ver herramientas/LEEME.md"
       - uses: actions/checkout@v4
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         with:
           path: sitio
       - name: Traer el núcleo de análisis (repositorio privado, con token)
@@ -85,16 +84,20 @@ jobs:
         with:
           python-version: "3.12"
       - uses: actions/setup-node@v4
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         with:
           node-version: "20"
       - name: Instalar dependencias
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
           pip install -q -r kronos/requirements.txt requests
           cd kronos/nucleo/pdf && npm ci --silent && npx playwright install --with-deps chromium >/dev/null
           sudo apt-get install -y -qq poppler-utils >/dev/null || true
       - name: Descargar los datos del año (una sola lectura de los archivos del MEF)
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: python kronos/nucleo/datos/descargar_municipal.py $ENTS --anio $ANIO
       - name: Regenerar, verificar y publicar cada portal
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
           fallas=""
           for e in $ENTS; do
@@ -106,11 +109,13 @@ jobs:
           done
           echo "FALLAS=$fallas" >> "$GITHUB_ENV"
       - name: Registrar lo que se vio del MEF
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
           cd sitio
           # si alguna entidad no pudo publicarse, no se da por vista la publicación: la próxima revisión vuelve a intentarlo
           if [ -z "$(echo $FALLAS | tr -d ' ')" ]; then python herramientas/vigilar_municipal.py --guardar "${{ needs.vigilar.outputs.publicado }}"; fi
       - name: Publicar
+        if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
           cd sitio
           git config user.name "AlcaldealdIA"
