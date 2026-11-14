@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Falta el acceso al núcleo (la tarea queda en espera, sin error)
         if: env.HAY_CLAVE != 'true' && env.HAY_TOKEN != 'true'
-        run: echo "::notice::Falta el secreto KRONOS_TOKEN (o KRONOS_DEPLOY_KEY); no se actualiza nada hasta configurarlo. Ver herramientas/LEEME.md"
+        run: echo "::warning::NO SE ACTUALIZÓ NINGÚN PORTAL: falta el secreto KRONOS_TOKEN (o KRONOS_DEPLOY_KEY). Los portales siguen con su último corte y sin reloj. Ver herramientas/LEEME.md"
       - uses: actions/checkout@v4
         if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         with:
