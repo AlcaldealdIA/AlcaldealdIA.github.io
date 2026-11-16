@@ -34,5 +34,11 @@
   "slug": "cusco",
   "automatico": true,
   "anio": 2026
+ },
+ "laconvencion": {
+  "nombre": "Municipalidad Provincial de La Convención",
+  "slug": "laconvencion",
+  "automatico": true,
+  "anio": 2026
  }
 }
