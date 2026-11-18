@@ -22,8 +22,13 @@ def tarjeta(k, v):
     D = json.load(open(dj, encoding="utf-8")) if os.path.isfile(dj) else None
     if D:
         T, S = D["total"], D["semana"]
+        # Total de obras sin aumento del gasto: de la lista completa (auditoría F1, A1). La lista «obras_sin_gasto» trae
+        # solo las 10 de mayor saldo; si el portal aún no publica el total, se recuenta desde «obras» con la misma regla.
+        n_sg = (D.get("obras_sin_gasto_total") or {}).get("n")
+        if n_sg is None:
+            n_sg = sum(1 for o in D.get("obras", []) if o.get("mes_estado") != "aumento" and not o.get("generico"))
         cif = (f'<div class="c3"><div><span>Presupuesto {D["anio"]}</span><b>{M(T["pim"])}</b></div><div><span>Gastado</span><b>{100*T["ejec"]:.1f} %</b></div>'
-               f'<div><span>Obras sin gasto en {E(D["mes"])}</span><b>{len(D["obras_sin_gasto"])}</b></div></div>'
+               f'<div><span>Obras sin gasto en {E(D["mes"])}</span><b>{n_sg}</b></div></div>'
                f'<p class="dato">Datos al {F(D["corte"])}</p>')
         dia = f'<a class="b2" href="{slug}/dia/">Día por día</a>'
     else:
