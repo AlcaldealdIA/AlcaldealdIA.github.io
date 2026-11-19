@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -q requests
+      - run: pip install -q requests==2.34.2          # versión fija, igual que kronos/requirements.txt
       - name: ¿El MEF publicó algo nuevo?
         id: mef
         env:
@@ -84,6 +84,7 @@ jobs:
           repository: AlcaldealdIA/kronos-nucleo
           token: ${{ secrets.KRONOS_TOKEN }}
           path: kronos
+          persist-credentials: false       # el acceso al núcleo no queda guardado en disco durante el resto de la corrida
       - name: Traer el núcleo de análisis (repositorio privado, con clave SSH)
         if: env.HAY_TOKEN != 'true' && env.HAY_CLAVE == 'true'
         uses: actions/checkout@v4
@@ -91,6 +92,7 @@ jobs:
           repository: AlcaldealdIA/kronos-nucleo
           ssh-key: ${{ secrets.KRONOS_DEPLOY_KEY }}
           path: kronos
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -101,7 +103,7 @@ jobs:
       - name: Instalar dependencias
         if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
-          pip install -q -r kronos/requirements.txt requests
+          pip install -q -r kronos/requirements.txt
           cd kronos/nucleo/pdf && npm ci --silent && npx playwright install --with-deps chromium >/dev/null
           sudo apt-get install -y -qq poppler-utils >/dev/null || true
       - name: Pruebas del día por día (si fallan, no se calcula ni se publica nada)
