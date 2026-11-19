@@ -66,6 +66,8 @@ jobs:
       HAY_TOKEN: ${{ secrets.KRONOS_TOKEN != '' }}
       ENTS: ${{ needs.vigilar.outputs.entidades }}
       ANIO: ${{ needs.vigilar.outputs.anio }}
+      # La fecha viene del servidor del MEF: se pasa como dato (variable entrecomillada), nunca pegada dentro de un guion.
+      PUBLICADO: ${{ needs.vigilar.outputs.publicado }}
     steps:
       - name: Falta el acceso al núcleo (la tarea queda en espera, sin error)
         if: env.HAY_CLAVE != 'true' && env.HAY_TOKEN != 'true'
@@ -125,7 +127,7 @@ jobs:
         run: |
           cd sitio
           # si alguna entidad no pudo publicarse, no se da por vista la publicación: la próxima revisión vuelve a intentarlo
-          if [ -z "$(echo $FALLAS | tr -d ' ')" ]; then python herramientas/vigilar_municipal.py --guardar "${{ needs.vigilar.outputs.publicado }}"; fi
+          if [ -z "$(echo $FALLAS | tr -d ' ')" ]; then python herramientas/vigilar_municipal.py --guardar "$PUBLICADO"; fi
       - name: Publicar
         if: env.HAY_CLAVE == 'true' || env.HAY_TOKEN == 'true'
         run: |
@@ -135,5 +137,5 @@ jobs:
           git config user.email "noreply@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
-          git commit -q -m "Portales municipales: datos del MEF publicados el ${{ needs.vigilar.outputs.publicado }}"
+          git commit -q -m "Portales municipales: datos del MEF publicados el $PUBLICADO"
           ok=0; for i in 1 2 3 4 5; do git pull --rebase -q origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && ok=1 && break; git rebase --abort 2>/dev/null || true; sleep $((5 + RANDOM % 20)); done; [ "$ok" = 1 ]

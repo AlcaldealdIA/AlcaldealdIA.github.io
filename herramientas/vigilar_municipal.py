@@ -13,6 +13,7 @@ hasta que se configure el nuevo ejercicio. Si no se puede consultar al MEF, la t
 import datetime as dt
 import json
 import os
+import re
 import sys
 from email.utils import parsedate_to_datetime
 
@@ -22,6 +23,20 @@ MUN = json.load(open(os.path.join(AQUI, "municipios.json"), encoding="utf-8"))
 LIMA = dt.timezone(dt.timedelta(hours=-5))
 DA_URL = "https://fs.datosabiertos.mef.gob.pe/datastorefiles/{anio}-Gasto-Diario.csv"
 UA = {"User-Agent": "Mozilla/5.0 (portal presupuestal municipal)"}
+
+
+FECHA_HTTP = re.compile(r"[A-Za-z]{3}, \d{2} [A-Za-z]{3} \d{4} \d{2}:\d{2}:\d{2} GMT")
+
+
+def fecha_http(v):
+    """La fecha de publicación llega de un servidor externo y termina en archivos y comandos de la tarea automática: solo se acepta
+    con la forma estándar («Wed, 18 Nov 2026 13:39:08 GMT»). Cualquier otro texto se rechaza (revisión de seguridad del 19/11/2026, I1)."""
+    if v is None:
+        return None
+    v = v.strip()
+    if not FECHA_HTTP.fullmatch(v):
+        raise ValueError("la fecha de publicación del archivo no tiene el formato esperado")
+    return v
 
 
 def salida(**kw):
@@ -54,7 +69,7 @@ def main():
     try:
         r = requests.head(DA_URL.format(anio=ANIO), timeout=60, headers=UA, allow_redirects=True)
         r.raise_for_status()
-        pub = r.headers.get("Last-Modified")
+        pub = fecha_http(r.headers.get("Last-Modified"))
         if not pub:
             raise ValueError("el archivo no informa su fecha de publicación")
     except Exception as e:
