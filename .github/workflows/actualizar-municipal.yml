@@ -20,6 +20,10 @@ on:
         description: "Solo esta entidad (su clave en municipios.json, por ejemplo zarumilla). Vacío = todas las automáticas"
         type: string
         default: ""
+      probar_aviso:
+        description: "Solo para probar el aviso de falla (crea un aviso de prueba que se cierra solo en la próxima corrida normal)"
+        type: boolean
+        default: false
 
 # Mínimo privilegio: lectura por defecto; solo el trabajo que publica puede escribir.
 permissions:
@@ -141,3 +145,51 @@ jobs:
           if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
           git commit -q -m "Portales municipales: datos del MEF publicados el $PUBLICADO"
           ok=0; for i in 1 2 3 4 5; do git pull --rebase -q origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && ok=1 && break; git rebase --abort 2>/dev/null || true; sleep $((5 + RANDOM % 20)); done; [ "$ok" = 1 ]
+
+  # Aviso de falla (19/11/2026): si una parte de la tarea termina en error, o una página no se pudo actualizar y se conservó la
+  # versión anterior, se abre UN aviso (issue) asignado a la cuenta, y GitHub lo manda por correo. Mientras siga abierto no se
+  # repite; la primera corrida que vuelva a funcionar lo cierra sola. Solo en main (una rama de prueba no avisa).
+  avisar:
+    needs: [vigilar, actualizar]
+    if: always() && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      actions: read
+      checks: read
+    steps:
+      - name: Avisar si algo falló (y cerrar el aviso cuando vuelve a funcionar)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RES: "${{ needs.vigilar.result }} ${{ needs.actualizar.result }}"
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PROBAR: ${{ github.event_name == 'workflow_dispatch' && inputs.probar_aviso }}
+        run: |
+          motivo=""
+          case " $RES " in *" failure "*) motivo="una parte de la tarea terminó con error";; esac
+          # avisos de la corrida que significan que una página no se actualizó (se conservó la versión anterior)
+          : > /tmp/avisos.txt
+          for j in $(gh run view "$RUN_ID" --json jobs --jq '.jobs[].databaseId'); do
+            gh api "repos/$GH_REPO/check-runs/$j/annotations" --jq '.[].message' >> /tmp/avisos.txt 2>/dev/null || true
+          done
+          if grep -q -E 'Una comprobación del informe falló|no se publicó nada' /tmp/avisos.txt; then
+            motivo="${motivo:+$motivo; }una página no se pudo actualizar y se conservó la versión anterior"
+          fi
+          [ "$PROBAR" = "true" ] && motivo="prueba del aviso (no es una falla real; se cierra en la próxima corrida normal)"
+          abierto=$(gh issue list --label falla-automatica --state open --json number --jq '.[0].number // empty')
+          if [ -n "$motivo" ]; then
+            if [ -n "$abierto" ]; then echo "Ya hay un aviso abierto (#$abierto): no se repite."; exit 0; fi
+            gh label create falla-automatica --color B60205 --description "Aviso automático: la tarea horaria falló" 2>/dev/null || true
+            printf '%s\n' "La tarea automática de las $(TZ=America/Lima date '+%H:%M del %d/%m/%Y') (hora de Lima) tuvo un problema: **$motivo**." "" \
+              "- Lo publicado no se borró: la página sigue mostrando su última versión válida." \
+              "- Detalle de la corrida: $RUN_URL" \
+              "- Este aviso se cierra solo cuando una corrida vuelva a funcionar. Si sigue abierto varias horas, pida revisarlo." > /tmp/cuerpo.md
+            gh issue create --label falla-automatica --assignee AlcaldealdIA --title "Falla en la actualización automática" --body-file /tmp/cuerpo.md
+          elif [ -n "$abierto" ]; then
+            gh issue close "$abierto" --comment "Volvió a funcionar en la corrida $RUN_URL. Aviso cerrado automáticamente."
+          else
+            echo "Sin problemas."
+          fi
