@@ -45,6 +45,8 @@ body.mc-con-riel{padding-left:var(--mc-ancho)}
 .mc-item[aria-current="page"]{color:#fff;background:rgba(255,255,255,.09)}
 .mc-item[aria-current="page"]::before{transform:scaleY(1)}
 .mc-item[aria-current="page"] svg{color:var(--mc-gold)}
+.mc-item.mc-sub{padding:6px 4px 6px 8px;font-size:10.5px;line-height:1.2;text-align:center;color:var(--mc-claro);opacity:.85;border-left:1px solid rgba(255,255,255,.14);margin-left:10px}
+.mc-item.mc-sub:hover{opacity:1}
 .mc-item:focus-visible,.mc-entidad:focus-visible,.mc-marca:focus-visible{outline:2px solid var(--mc-gold);outline-offset:-2px}
 
 /* Insignia EN VIVO al pie del menú */

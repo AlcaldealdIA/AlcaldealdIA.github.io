@@ -144,6 +144,10 @@
       var actual = v.k === 'sede' ? (VISTA === 'control' && sedeActual()) : (v.k === vistaActual() && !(VISTA === 'control' && sedeActual()));
       var titulo = v.k === 'sede' && ENT[ID].siglas_ue ? ' title="' + esc(ENT[ID].siglas_ue[ENT[ID].sede] || 'Sede') + '"' : '';
       h += li + '<a class="' + cls + '" data-k="' + v.k + '" href="' + url + '"' + titulo + (actual ? ' aria-current="page"' : '') + '>' + svg(v.ico || v.k) + v.t + '</a></li>';
+      // Secciones de la página actual (la página las declara en window.MC_SUB): van bajo su opción, en escritorio.
+      if (v.k === VISTA && window.MC_SUB) window.MC_SUB.forEach(function (x) {
+        h += '<li class="mc-solo-escritorio"><a class="mc-item mc-sub" href="' + esc(x.h) + '">' + esc(x.t) + '</a></li>';
+      });
     });
     return h;
   }
@@ -262,6 +266,7 @@
     var h = cabecera('Más', e ? esc(e.nombre) : PORTAL.nombre) + '<ul class="mc-lista">';
     if (ID) {
       // Las opciones que en el celular no caben en la barra inferior
+      (window.MC_SUB || []).forEach(function (x) { h += op(x.h, svg('control'), x.t, 'En esta página'); });
       VISTAS.forEach(function (v) {
         if (v.solo === 'e' && v.url && v.k !== 'portada' && !falta(v)) h += op(v.url(ID), svg(v.ico || v.k), v.t, v.sub || '');
       });
