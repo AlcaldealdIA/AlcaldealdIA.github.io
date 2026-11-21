@@ -67,7 +67,11 @@
     ingresos: '<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m14 7 3-3 3 3"/>',
     nino: '<path d="M7 15a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 6.5 3.75 3.75 0 0 1 17.5 15H7z"/><path d="M8 18.5 7 21M12 18.5 11 21M16 18.5 15 21"/>',
     ruta: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/>',
-    informe: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 17v-3M12 17v-6M15 17v-4"/>'
+    informe: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 17v-3M12 17v-6M15 17v-4"/>',
+    historico: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7 14h2M11 14h2M15 14h2M7 17h2M11 17h2"/>',
+    pares: '<path d="M4 20V10M9 20V4M15 20v-8M20 20V7"/><path d="M2 20h20"/>',
+    deuda: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6 15h4"/>',
+    liquidez: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'
   };
   // solo: 'e' = solo escritorio, 'c' = solo celular
   var VISTAS = [
@@ -83,7 +87,7 @@
 
   if (PORTAL.menu) {
     VISTAS = [VISTAS[0]].concat(PORTAL.menu.map(function (m) {
-      return { k: m.k, t: m.t, solo: m.solo, ico: m.ico, panel: m.panel,
+      return { k: m.k, t: m.t, solo: m.solo, ico: m.ico, panel: m.panel, ruta: m.ruta,
                url: m.panel ? null : function (id) { return RAIZ + id + '/' + (m.ruta || ''); } };
     }), [VISTAS[VISTAS.length - 1]]);
   }
@@ -109,6 +113,17 @@
     } catch (e) { return null; }
   }
   function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // Menú propio con secciones de la misma página (#presupuesto, #deuda…): la opción existe solo si la sección existe
+  // en esta entidad, y se marca la que contiene lo que se está viendo.
+  function seccion(v) { return v.ruta && v.ruta.charAt(0) === '#' ? v.ruta.slice(1) : null; }
+  function falta(v) { var s = seccion(v); return !!s && VISTA === 'resumen' && !document.getElementById(s); }
+  function vistaActual() {
+    if (!PORTAL.menu || VISTA !== 'resumen' || !location.hash) return VISTA;
+    var t = null; try { t = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { t = null; }
+    var sec = t && t.closest ? t.closest('section') : null, k = VISTA;
+    VISTAS.forEach(function (v) { var s = seccion(v); if (s && (s === (t && t.id) || (sec && s === sec.id))) k = v.k; });
+    return k;
+  }
   function sedeActual() { var m = location.hash.match(/^#ue=(\w+)$/); return m && ENT[ID] && ENT[ID].sede === m[1]; }
 
   /* ---------- Menú ---------- */
@@ -125,8 +140,8 @@
         return;
       }
       var url = v.url(ID);
-      if (!url) return;   // por ejemplo, Sede si la entidad no tiene sede registrada
-      var actual = v.k === 'sede' ? (VISTA === 'control' && sedeActual()) : (v.k === VISTA && !(VISTA === 'control' && sedeActual()));
+      if (!url || falta(v)) return;   // por ejemplo, Sede si la entidad no tiene sede registrada, o una sección que esta entidad no tiene
+      var actual = v.k === 'sede' ? (VISTA === 'control' && sedeActual()) : (v.k === vistaActual() && !(VISTA === 'control' && sedeActual()));
       var titulo = v.k === 'sede' && ENT[ID].siglas_ue ? ' title="' + esc(ENT[ID].siglas_ue[ENT[ID].sede] || 'Sede') + '"' : '';
       h += li + '<a class="' + cls + '" data-k="' + v.k + '" href="' + url + '"' + titulo + (actual ? ' aria-current="page"' : '') + '>' + svg(v.ico || v.k) + v.t + '</a></li>';
     });
@@ -161,7 +176,7 @@
   function marcarActual() {
     riel.querySelectorAll('.mc-item[data-k]').forEach(function (a) {
       var k = a.getAttribute('data-k');
-      var act = k === 'sede' ? (VISTA === 'control' && sedeActual()) : (k === VISTA && !(VISTA === 'control' && sedeActual()));
+      var act = k === 'sede' ? (VISTA === 'control' && sedeActual()) : (k === vistaActual() && !(VISTA === 'control' && sedeActual()));
       if (act) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
   }
@@ -248,7 +263,7 @@
     if (ID) {
       // Las opciones que en el celular no caben en la barra inferior
       VISTAS.forEach(function (v) {
-        if (v.solo === 'e' && v.url && v.k !== 'portada') h += op(v.url(ID), svg(v.ico || v.k), v.t, v.sub || '');
+        if (v.solo === 'e' && v.url && v.k !== 'portada' && !falta(v)) h += op(v.url(ID), svg(v.ico || v.k), v.t, v.sub || '');
       });
       h += '<li><button type="button" class="mc-op" data-sub="descargas"><span class="mc-ic">' + svg('descargas') + '</span><span><b>Descargas</b><small>Informes y Excel verificable</small></span></button></li>';
     }
@@ -256,6 +271,8 @@
     escalonar();
     var b = panel.querySelector('[data-sub="descargas"]');
     if (b) b.addEventListener('click', function () { abrir('descargas'); });
+    // una sección de la misma página: se cierra el panel para verla
+    panel.querySelectorAll('a[href*="#"]').forEach(function (a) { a.addEventListener('click', cerrar); });
   }
 
   /* ---------- EN VIVO: estado real de la revisión automática ---------- */
