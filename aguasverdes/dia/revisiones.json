@@ -1,1 +1,10 @@
-[]
+[
+ {
+  "corte": "2026-11-20",
+  "indicador": "Devengado total",
+  "antes": 14392092.280000001,
+  "despues": 14368443.129999999,
+  "motivo": "El devengado acumulado bajó respecto del corte anterior (anulaciones o rebajas)",
+  "registrado": "2026-11-21T15:17:48+00:00"
+ }
+]
