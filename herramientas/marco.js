@@ -116,7 +116,11 @@
   // Menú propio con secciones de la misma página (#presupuesto, #deuda…): la opción existe solo si la sección existe
   // en esta entidad, y se marca la que contiene lo que se está viendo.
   function seccion(v) { return v.ruta && v.ruta.charAt(0) === '#' ? v.ruta.slice(1) : null; }
-  function falta(v) { var s = seccion(v); return !!s && VISTA === 'resumen' && !document.getElementById(s); }
+  function falta(v) {
+    var s = seccion(v); if (!s) return false;
+    if (window.MC_SIN && window.MC_SIN.indexOf(s) >= 0) return true;   // la página indica qué secciones no tiene la entidad
+    return VISTA === 'resumen' && !document.getElementById(s);
+  }
   function vistaActual() {
     if (!PORTAL.menu || VISTA !== 'resumen' || !location.hash) return VISTA;
     var t = null; try { t = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { t = null; }
@@ -144,6 +148,10 @@
       var actual = v.k === 'sede' ? (VISTA === 'control' && sedeActual()) : (v.k === vistaActual() && !(VISTA === 'control' && sedeActual()));
       var titulo = v.k === 'sede' && ENT[ID].siglas_ue ? ' title="' + esc(ENT[ID].siglas_ue[ENT[ID].sede] || 'Sede') + '"' : '';
       h += li + '<a class="' + cls + '" data-k="' + v.k + '" href="' + url + '"' + titulo + (actual ? ' aria-current="page"' : '') + '>' + svg(v.ico || v.k) + v.t + '</a></li>';
+      // Secciones de la página actual (la página las declara en window.MC_SUB): van bajo su opción, en escritorio.
+      if (v.k === VISTA && window.MC_SUB) window.MC_SUB.forEach(function (x) {
+        h += '<li class="mc-solo-escritorio"><a class="mc-item mc-sub" href="' + esc(x.h) + '">' + esc(x.t) + '</a></li>';
+      });
     });
     return h;
   }
@@ -262,6 +270,7 @@
     var h = cabecera('Más', e ? esc(e.nombre) : PORTAL.nombre) + '<ul class="mc-lista">';
     if (ID) {
       // Las opciones que en el celular no caben en la barra inferior
+      (window.MC_SUB || []).forEach(function (x) { h += op(x.h, svg('control'), x.t, 'En esta página'); });
       VISTAS.forEach(function (v) {
         if (v.solo === 'e' && v.url && v.k !== 'portada' && !falta(v)) h += op(v.url(ID), svg(v.ico || v.k), v.t, v.sub || '');
       });
