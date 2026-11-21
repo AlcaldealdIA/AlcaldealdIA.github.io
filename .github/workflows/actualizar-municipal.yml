@@ -20,6 +20,10 @@ on:
         description: "Solo esta entidad (su clave en municipios.json, por ejemplo zarumilla). Vacío = todas las automáticas"
         type: string
         default: ""
+      rama_nucleo:
+        description: "Rama del núcleo de análisis (kronos-nucleo) para probar cambios en una rama de prueba. Vacío = main"
+        type: string
+        default: ""
       probar_aviso:
         description: "Solo para probar el aviso de falla (crea un aviso de prueba que se cierra solo en la próxima corrida normal)"
         type: boolean
@@ -87,6 +91,7 @@ jobs:
         with:
           repository: AlcaldealdIA/kronos-nucleo
           token: ${{ secrets.KRONOS_TOKEN }}
+          ref: ${{ inputs.rama_nucleo || 'main' }}
           path: kronos
           persist-credentials: false       # el acceso al núcleo no queda guardado en disco durante el resto de la corrida
       - name: Traer el núcleo de análisis (repositorio privado, con clave SSH)
@@ -95,6 +100,7 @@ jobs:
         with:
           repository: AlcaldealdIA/kronos-nucleo
           ssh-key: ${{ secrets.KRONOS_DEPLOY_KEY }}
+          ref: ${{ inputs.rama_nucleo || 'main' }}
           path: kronos
           persist-credentials: false
       - uses: actions/setup-python@v5
