@@ -118,7 +118,7 @@
       var cls = 'mc-item' + (v.solo === 'e' ? ' mc-solo-escritorio' : v.solo === 'c' ? ' mc-solo-celular' : '');
       var li = '<li' + (v.solo === 'e' ? ' class="mc-solo-escritorio"' : v.solo === 'c' ? ' class="mc-solo-celular"' : '') + ' style="animation-delay:' + (120 + i * 45) + 'ms">';
       if (v.panel) { h += li + '<button type="button" class="' + cls + '" data-panel="' + v.panel + '">' + svg(v.ico || v.k) + v.t + '</button></li>'; return; }
-      if (v.k === 'portada' && Object.keys(ENT).length === 1) return;   // una sola entidad: la portada es su resumen
+      if (v.k === 'portada') return;   // cada entidad ve solo lo suyo: sin salida a la portada ni a otras entidades
       if (v.k === 'portada') { h += li + '<a class="' + cls + '" href="' + RAIZ + '"' + (VISTA === 'portada' ? ' aria-current="page"' : '') + '>' + svg(v.ico || v.k) + v.t + '</a></li>'; return; }
       if (!ID) {   // en la portada todavía no hay entidad
         h += li + '<button type="button" class="' + cls + '" data-panel="entidades" data-destino="' + v.k + '">' + svg(v.ico || v.k) + v.t + '</button></li>';
@@ -136,7 +136,7 @@
     riel = document.createElement('nav');
     riel.className = 'mc-riel';
     riel.setAttribute('aria-label', 'Navegación del portal');
-    riel.innerHTML = '<a class="mc-marca" href="' + RAIZ + '" title="' + PORTAL.nombre.replace(/<[^>]+>/g, '') + ' · portada">' +
+    riel.innerHTML = '<a class="mc-marca" href="' + (ID ? RAIZ + ID + '/' : RAIZ) + '" title="' + PORTAL.nombre.replace(/<[^>]+>/g, '') + '">' +
       '<span class="mc-sello"><b>' + PORTAL.sello + '</b></span><small>' + PORTAL.corto + '</small></a>' +
       '<div class="mc-entidad mc-fija"><small>' + (ID ? '…' : 'Portal') + '</small><span class="mc-entidad-t">' + (ID ? '…' : PORTAL.portada) + '</span></div>' +
       '<ul class="mc-items">' + htmlItems() + '</ul>' +
@@ -244,7 +244,7 @@
   }
   function pintarMas() {
     var e = ID && ENT[ID];
-    var h = cabecera('Más', e ? esc(e.nombre) : PORTAL.nombre) + '<ul class="mc-lista">' + (Object.keys(ENT).length === 1 ? '' : op(RAIZ, svg('portada'), 'Portada', PORTAL.lema));
+    var h = cabecera('Más', e ? esc(e.nombre) : PORTAL.nombre) + '<ul class="mc-lista">';
     if (ID) {
       // Las opciones que en el celular no caben en la barra inferior
       VISTAS.forEach(function (v) {
@@ -417,11 +417,8 @@
 
   /* ---------- Arranque ---------- */
   function arrancar() {
-    if (VISTA !== 'portada') { seguir(); return; }
-    // En la portada se espera la lista: con una sola entidad ya se está yendo a su resumen ejecutivo.
-    LISTA.then(function (P) {
-      if (Object.keys(P).filter(function (k) { return P[k].nombre; }).length !== 1) seguir();
-    }).catch(seguir);
+    // La portada es una página neutra del portal: no lleva menú ni lista de entidades (con una sola, ya se va a ella).
+    if (VISTA !== 'portada') seguir();
   }
   function seguir() {
     construirRiel();
