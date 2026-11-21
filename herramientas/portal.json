@@ -34,10 +34,31 @@
    "ico": "presupuesto"
   },
   {
+   "k": "historico",
+   "t": "Cuatro años",
+   "ruta": "#historico",
+   "ico": "historico",
+   "solo": "e"
+  },
+  {
+   "k": "pares",
+   "t": "Comparación",
+   "ruta": "#pares",
+   "ico": "pares",
+   "solo": "e"
+  },
+  {
    "k": "ingresos",
-   "t": "Ingresos y deuda",
+   "t": "Ingresos",
    "ruta": "#ingresos",
    "ico": "ingresos",
+   "solo": "e"
+  },
+  {
+   "k": "deuda",
+   "t": "Deuda",
+   "ruta": "#deuda",
+   "ico": "deuda",
    "solo": "e"
   },
   {
@@ -52,6 +73,13 @@
    "t": "Ruta 30 días",
    "ruta": "#ruta30",
    "ico": "ruta"
+  },
+  {
+   "k": "liquidez",
+   "t": "Liquidez",
+   "ruta": "#liquidez",
+   "ico": "liquidez",
+   "solo": "e"
   },
   {
    "k": "informe",
