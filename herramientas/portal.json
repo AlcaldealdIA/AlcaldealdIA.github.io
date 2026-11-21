@@ -1,0 +1,75 @@
+{
+ "sello": "A<i>D</i>",
+ "nombre": "Alcalde al <i>Día</i>",
+ "corto": "Alcalde<br>al <i>Día</i>",
+ "lema": "Análisis presupuestal municipal · Perú",
+ "repo": "AlcaldealdIA/AlcaldealdIA.github.io",
+ "tarea": "actualizar-municipal.yml",
+ "entidades": "municipios.json",
+ "url": "https://alcaldealdia.github.io",
+ "elegir": "Elige la municipalidad",
+ "portada": "Municipalidades",
+ "quien": "cada municipalidad",
+ "colores": {
+  "navy": "#13294b",
+  "navy2": "#0b1c36",
+  "gold": "#e0a83c"
+ },
+ "menu": [
+  {
+   "k": "resumen",
+   "t": "Resumen",
+   "ruta": ""
+  },
+  {
+   "k": "dia",
+   "t": "Día por día",
+   "ruta": "dia/",
+   "ico": "control"
+  },
+  {
+   "k": "presupuesto",
+   "t": "Presupuesto",
+   "ruta": "#presupuesto",
+   "ico": "presupuesto"
+  },
+  {
+   "k": "ingresos",
+   "t": "Ingresos y deuda",
+   "ruta": "#ingresos",
+   "ico": "ingresos",
+   "solo": "e"
+  },
+  {
+   "k": "nino",
+   "t": "El Niño",
+   "ruta": "#nino",
+   "ico": "nino",
+   "solo": "e"
+  },
+  {
+   "k": "ruta30",
+   "t": "Ruta 30 días",
+   "ruta": "#ruta30",
+   "ico": "ruta"
+  },
+  {
+   "k": "informe",
+   "t": "Informe",
+   "ruta": "informe/informe-detallado.html",
+   "ico": "informe",
+   "solo": "e"
+  },
+  {
+   "k": "descargas",
+   "t": "Descargas",
+   "panel": "descargas",
+   "solo": "e"
+  }
+ ],
+ "commit": "AlcaldealdIA",
+ "cortes": {
+  "informe": "dia/datos.json",
+  "control": "dia/datos.json"
+ }
+}

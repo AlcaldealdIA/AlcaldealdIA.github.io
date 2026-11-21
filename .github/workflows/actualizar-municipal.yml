@@ -139,6 +139,12 @@ jobs:
         run: |
           cd sitio
           python herramientas/portada.py
+          # Marco común (menú vertical, EN VIVO y vista previa al compartir): la misma versión que Ministro al Día y GORE al Día,
+          # traída del núcleo; si el núcleo no la trae, se usa la copia del sitio. Las páginas regeneradas lo reciben de nuevo.
+          for f in marco.js marco.css insertar_marco.py; do [ -f "../kronos/pliegos/portal/herramientas/$f" ] && cp "../kronos/pliegos/portal/herramientas/$f" herramientas/; done
+          for s in $(python -c "import json;print(' '.join(v.get('slug',k) for k,v in json.load(open('herramientas/municipios.json',encoding='utf-8')).items()))"); do
+            [ -d "$s" ] && python herramientas/insertar_marco.py "$s" > /dev/null
+          done
           git config user.name "AlcaldealdIA"
           git config user.email "noreply@users.noreply.github.com"
           git add -A
