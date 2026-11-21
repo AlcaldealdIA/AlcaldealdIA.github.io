@@ -116,7 +116,11 @@
   // Menú propio con secciones de la misma página (#presupuesto, #deuda…): la opción existe solo si la sección existe
   // en esta entidad, y se marca la que contiene lo que se está viendo.
   function seccion(v) { return v.ruta && v.ruta.charAt(0) === '#' ? v.ruta.slice(1) : null; }
-  function falta(v) { var s = seccion(v); return !!s && VISTA === 'resumen' && !document.getElementById(s); }
+  function falta(v) {
+    var s = seccion(v); if (!s) return false;
+    if (window.MC_SIN && window.MC_SIN.indexOf(s) >= 0) return true;   // la página indica qué secciones no tiene la entidad
+    return VISTA === 'resumen' && !document.getElementById(s);
+  }
   function vistaActual() {
     if (!PORTAL.menu || VISTA !== 'resumen' || !location.hash) return VISTA;
     var t = null; try { t = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { t = null; }
