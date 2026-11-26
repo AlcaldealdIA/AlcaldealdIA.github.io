@@ -1,0 +1,2135 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DCs+lHSA80e//5jRPD/nxtPoufNF8yyzcxBnBIX8NcU='; style-src 'sha256-GF8A8V5+MiweJdrJNcflBFO4gJp0emasGYZ5ahVnMUw='; img-src data: blob:; connect-src 'none'; font-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#15222e">
+<meta name="description" content="Topes máximos de capacidad anual 2026 para Obras por Impuestos de gobiernos regionales y locales del Perú: consulta por departamento, provincia, distrito y entidad.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Monitor de Obras y Servicios por Impuestos 2026">
+<meta property="og:description" content="Consulta y compara los topes de capacidad anual de gobiernos regionales y locales del Perú. Un tope no es saldo disponible.">
+<meta property="og:locale" content="es_PE">
+<title>Monitor de Obras por Impuestos 2026 | Topes de gobiernos regionales y locales</title>
+<style>/* ==========================================================================
+ * Monitor OxI 2026 — Estilos
+ * Tokens: el color codifica el nivel de gobierno (regional/local) en toda la
+ * interfaz. Rojo solo para saldos excedidos. Ámbar para el foco del teclado.
+ * ========================================================================== */
+:root {
+  --paper: #f3f5f7;
+  --surface: #ffffff;
+  --ink: #15222e;
+  --ink-2: #33475a;
+  --muted: #5a6876;
+  --line: #d6dde4;
+  --line-soft: #e8edf1;
+  --regional: #0b5c78;
+  --regional-soft: #e3f0f5;
+  --local: #5b6b0c;
+  --local-soft: #eef2dc;
+  --action: #1d3448;
+  --action-hover: #10202e;
+  --focus: #f2a900;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --warn-ink: #5c4300;
+  --warn-soft: #fff3cd;
+  --ok: #1e6b3a;
+  --display: "Bahnschrift", "DIN Alternate", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --text: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --r-sm: 4px;
+  --r-md: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--text); }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; line-height: 1.2; margin: 0; letter-spacing: 0; }
+p { margin: 0; }
+a { color: var(--regional); text-underline-offset: 2px; }
+a:hover { color: var(--action-hover); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 2px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.hidden { display: none !important; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.print-only { display: none; }
+.skip { position: absolute; left: 12px; top: -48px; background: var(--focus); color: var(--ink); padding: 8px 14px; font-weight: 700; z-index: 10; border-radius: var(--r-sm); }
+.skip:focus { top: 12px; }
+main:focus { outline: none; }
+
+/* ---------------------------------- Encabezado ---------------------------------- */
+.site { background: var(--ink); color: #fff; }
+.site__bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px 32px; flex-wrap: wrap; padding-top: 22px; padding-bottom: 20px; }
+.site__kicker { color: #a9bccb; font-size: 13px; margin-bottom: 4px; }
+.site__title { font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; }
+.site__status { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: #d5e0e8; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; }
+.pill--warn { background: var(--warn-soft); color: var(--warn-ink); }
+
+/* ------------------------------- Cinta nacional ------------------------------- */
+.ribbon { margin: 28px 0 8px; }
+.ribbon__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 40px; flex-wrap: wrap; margin-bottom: 12px; }
+.ribbon__label { font-size: 15px; font-weight: 500; color: var(--ink-2); font-family: var(--text); }
+.ribbon__total { font-family: var(--display); font-size: clamp(40px, 6vw, 68px); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; margin-top: 6px; }
+.ribbon__note { max-width: 58ch; color: var(--muted); font-size: 13.5px; }
+.ribbon__bar { display: flex; height: 22px; border-radius: var(--r-sm); overflow: hidden; background: var(--line-soft); }
+.ribbon__seg { height: 100%; }
+.ribbon__seg--regional { background: var(--regional); }
+.ribbon__seg--local { background: var(--local); }
+.ribbon__seg + .ribbon__seg { border-left: 2px solid var(--paper); }
+.ribbon__legend { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 32px; margin: 12px 0 0; }
+.ribbon__legend > div:last-child { text-align: right; }
+.ribbon__legend dt { font-size: 13.5px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
+.ribbon__legend dd { margin: 2px 0 0; font-family: var(--display); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ribbon__legend dd small { font-family: var(--text); font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 6px; }
+
+.swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex: none; }
+.swatch--regional { background: var(--regional); }
+.swatch--local { background: var(--local); }
+
+/* ---------------------------------- Pestañas ---------------------------------- */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 28px 0 0; overflow-x: auto; }
+.tabs [role="tab"] { font: 600 15px/1.2 var(--text); color: var(--muted); background: none; border: 0; border-bottom: 3px solid transparent; padding: 12px 14px 11px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; }
+.tabs [role="tab"]:hover { color: var(--ink); }
+.tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* ----------------------------------- Paneles ----------------------------------- */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 0 0 var(--r-md) var(--r-md); padding: 22px 24px 24px; }
+.panel + .panel { margin-top: 18px; border-radius: var(--r-md); }
+.panel__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 16px; }
+.panel h2 { font-size: 21px; }
+.sub { color: var(--muted); font-size: 13.5px; }
+.inline-field { font-size: 13px; color: var(--muted); font-weight: 600; display: grid; gap: 4px; min-width: 260px; }
+
+/* ----------------------------------- Controles ----------------------------------- */
+label { font-size: 13px; color: var(--ink-2); font-weight: 600; }
+input[type="search"], input[type="text"], input[type="number"], input[type="date"], select {
+  width: 100%; display: block; margin-top: 5px; font: 400 15px/1.3 var(--text); color: var(--ink);
+  background: var(--surface); border: 1px solid #b4c1cc; border-radius: var(--r-sm); padding: 9px 10px; min-height: 42px;
+}
+select { padding-right: 28px; }
+input:hover, select:hover { border-color: var(--ink-2); }
+input:disabled, select:disabled { background: var(--line-soft); color: var(--muted); cursor: not-allowed; }
+.btn { font: 600 14px/1.2 var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; padding: 9px 16px; border-radius: var(--r-sm); border: 1px solid #a9b7c3; background: var(--surface); color: var(--action); cursor: pointer; text-decoration: none; }
+.btn:hover { background: #eef2f5; border-color: var(--action); }
+.btn--primary { background: var(--action); color: #fff; border-color: var(--action); }
+.btn--primary:hover { background: var(--action-hover); color: #fff; }
+.btn--ghost { border-color: transparent; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.btn--ghost:hover { background: var(--line-soft); border-color: transparent; }
+.btn--danger { color: var(--danger); border-color: #e3b5b0; }
+.btn--danger:hover { background: var(--danger-soft); border-color: var(--danger); }
+.btn--small { min-height: 36px; padding: 6px 12px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--file { position: relative; }
+.btn--file input, .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.btn--file:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.actions--stack { flex-direction: column; align-items: stretch; }
+.actions--end { justify-content: flex-end; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; margin-top: 12px; padding: 10px 12px; background: var(--warn-soft); color: var(--warn-ink); border-radius: var(--r-sm); }
+.check input { width: 18px; height: 18px; margin-top: 2px; flex: none; }
+
+/* ----------------------------------- Filtros ----------------------------------- */
+.filters { display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: flex-end; padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); }
+.filters > label { flex: 1 1 190px; min-width: 0; max-width: 340px; }
+.filters > .f-search { flex: 2.2 1 300px; max-width: none; }
+.f-reset { flex: none; }
+
+/* ------------------------------------- KPI ------------------------------------- */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 14px; border: 1px solid var(--line); border-radius: var(--r-md); }
+.kpi { padding: 14px 18px; }
+.kpi + .kpi { border-left: 1px solid var(--line); }
+.kpi__label { font-size: 13px; color: var(--ink-2); font-weight: 600; }
+.kpi__value { font-family: var(--display); font-size: clamp(24px, 2.8vw, 34px); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.15; margin: 4px 0 2px; }
+.kpi__hint { font-size: 12.5px; color: var(--muted); }
+.kpi--danger .kpi__value { color: var(--danger); }
+.kpi--danger { background: var(--danger-soft); }
+.kpi--muted .kpi__value { color: var(--muted); }
+
+/* -------------------------------- Avisos -------------------------------- */
+.notice { font-size: 14px; background: var(--warn-soft); color: var(--warn-ink); padding: 10px 14px; border-radius: var(--r-sm); border-left: 4px solid #d9a400; }
+.alerts { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+.alerts li { font-size: 14px; padding: 9px 14px; border-radius: var(--r-sm); background: var(--danger-soft); color: #7a1a12; border-left: 4px solid var(--danger); }
+.alerts li.info { background: var(--regional-soft); color: #08394b; border-left-color: var(--regional); }
+
+/* ---------------------------------- Tabla ---------------------------------- */
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px 20px; flex-wrap: wrap; margin: 16px 0 10px; }
+.toolbar__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.table-wrap { overflow: auto; max-height: 640px; border: 1px solid var(--line); border-radius: var(--r-md); }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+thead th { position: sticky; top: 0; z-index: 1; background: #edf1f4; color: var(--ink-2); text-align: left; font-weight: 600; font-size: 13px; padding: 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+thead th > span, thead th > button { display: flex; align-items: center; gap: 6px; width: 100%; padding: 10px 12px; }
+thead th > button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-align: inherit; }
+thead th > button:hover { background: #e1e8ee; }
+th.num > span, th.num > button { justify-content: flex-end; text-align: right; }
+.sort-ind { font-size: 11px; color: var(--muted); min-width: 10px; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+tbody tr:hover td { background: #f7f9fb; }
+td.num { text-align: right; white-space: nowrap; font-weight: 600; }
+td.na { color: var(--muted); font-weight: 400; }
+td.neg { color: var(--danger); }
+td.name { min-width: 220px; }
+td.code { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+tfoot td { font-weight: 700; background: #edf1f4; border-top: 1px solid var(--line); border-bottom: 0; position: sticky; bottom: 0; }
+.lvl { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; }
+.tag-neg { display: inline-block; margin-left: 6px; font-size: 11.5px; font-weight: 700; color: #fff; background: var(--danger); padding: 1px 6px; border-radius: 3px; }
+.empty { text-align: center; color: var(--muted); padding: 32px 12px; }
+.pager { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+
+/* ---------------------------------- Gráfico ---------------------------------- */
+.chart { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.chart li { display: grid; grid-template-columns: minmax(120px, 320px) 1fr 120px; gap: 14px; align-items: center; font-size: 14px; }
+.chart__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chart__track { display: flex; height: 14px; background: var(--line-soft); border-radius: 3px; overflow: hidden; }
+.chart__seg { height: 100%; }
+.chart__seg--regional { background: var(--regional); }
+.chart__seg--local { background: var(--local); }
+.chart__val { text-align: right; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart-key { display: flex; gap: 16px; font-size: 13px; color: var(--ink-2); }
+.chart-key span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* -------------------------------- Importación -------------------------------- */
+.import-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: paso; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; min-width: 0; }
+.step { counter-increment: paso; position: relative; padding-left: 46px; min-width: 0; }
+.step::before { content: counter(paso); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink); font: 600 15px/26px var(--display); text-align: center; }
+.step h3 { font-size: 17px; margin-bottom: 6px; }
+.step > p { color: var(--ink-2); font-size: 14px; }
+.link-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.drop { position: relative; border: 2px dashed #9fb0be; border-radius: var(--r-md); padding: 22px; background: #f8fafb; text-align: center; margin-top: 4px; }
+.drop:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.drop.is-over { border-color: var(--regional); background: var(--regional-soft); }
+.drop__label { cursor: pointer; font-size: 15px; font-weight: 500; }
+.link-like { color: var(--regional); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+.status { margin-top: 8px; font-size: 14px; }
+.status.is-error { color: var(--danger); font-weight: 600; }
+.status.is-ok { color: var(--ok); font-weight: 600; }
+.mapper > label { min-width: 0; }
+.mapper { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 14px; margin: 6px 0 10px; }
+.req { font-weight: 400; color: var(--muted); font-size: 12px; }
+.preview { max-height: 220px; overflow: auto; border: 1px solid var(--line); border-radius: var(--r-sm); margin-top: 10px; font-size: 13px; }
+.preview table { font-size: 12.5px; }
+.preview th { position: sticky; top: 0; background: #edf1f4; padding: 6px 10px; text-align: left; white-space: nowrap; }
+.preview td { padding: 6px 10px; white-space: nowrap; }
+.preview th.is-mapped { background: var(--regional-soft); color: #08394b; box-shadow: inset 0 -3px 0 var(--regional); }
+.preview th small { display: block; font-weight: 500; font-size: 11.5px; color: var(--regional); }
+.review-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; margin: 4px 0 12px; }
+.review-stats div { padding: 10px 14px; background: var(--surface); }
+.review-stats dt { font-size: 12.5px; color: var(--muted); }
+.review-stats dd { margin: 2px 0 0; font: 600 20px/1.2 var(--display); font-variant-numeric: tabular-nums; }
+.review-list { max-height: 200px; overflow: auto; font-size: 13px; border: 1px solid var(--line); border-radius: var(--r-sm); margin-top: 8px; }
+.review-list td, .review-list th { padding: 5px 10px; }
+.review-list th { background: #edf1f4; text-align: left; position: sticky; top: 0; }
+.ok-line { color: var(--ok); font-weight: 600; font-size: 14px; }
+.base { background: #f8fafb; border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px; }
+.base h3 { font-size: 17px; margin-bottom: 4px; }
+.base h4 { font-size: 15px; margin: 20px 0 8px; }
+.base__counts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 0; }
+.base__counts div { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: 8px 10px; }
+.base__counts dt { font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.base__counts dd { margin: 2px 0 0; font: 600 20px/1.2 var(--display); }
+.log { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; font-size: 13px; max-height: 320px; overflow: auto; }
+.log li { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: 8px 10px; }
+.log li.is-undone { opacity: .6; }
+.log strong { display: block; font-size: 13.5px; word-break: break-word; }
+.log .hash { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--muted); word-break: break-all; }
+
+/* ---------------------------------- Diálogo y aviso ---------------------------------- */
+dialog { border: 0; border-radius: var(--r-md); padding: 24px; max-width: min(560px, calc(100vw - 32px)); box-shadow: 0 20px 50px rgba(21, 34, 46, .28); color: var(--ink); }
+dialog::backdrop { background: rgba(21, 34, 46, .5); }
+dialog h2 { font-size: 20px; margin-bottom: 10px; }
+#dialogBody { font-size: 15px; color: var(--ink-2); display: grid; gap: 8px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: var(--r-sm); font-size: 14px; max-width: min(640px, calc(100vw - 32px)); box-shadow: 0 8px 24px rgba(21, 34, 46, .3); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+.toast.is-on { opacity: 1; }
+.toast.is-error { background: var(--danger); }
+
+/* ---------------------------------- Pie ---------------------------------- */
+.site-foot { margin: 28px 0 36px; font-size: 13px; color: var(--muted); display: grid; gap: 6px; max-width: 110ch; }
+.site-foot a { color: var(--ink-2); }
+
+/* -------------------------------- Responsive -------------------------------- */
+@media (max-width: 1080px) {
+  .import-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .panel { padding: 16px 14px; }
+  .mapper { grid-template-columns: 1fr 1fr; }
+  .filters > label { flex-basis: 140px; max-width: none; }
+  .filters > .f-search { flex-basis: 100%; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; }
+  .tabs [role="tab"] { white-space: normal; padding: 10px 6px 9px; font-size: 14px; text-align: center; }
+  .kpis { grid-template-columns: 1fr; }
+  .kpi + .kpi { border-left: 0; border-top: 1px solid var(--line); }
+  .ribbon__legend { grid-template-columns: 1fr; }
+  .ribbon__legend > div:last-child { text-align: left; }
+  .chart li { grid-template-columns: 1fr 96px; }
+  .chart__track { grid-column: 1 / -1; order: 3; }
+  .inline-field { min-width: 0; width: 100%; }
+  .toolbar__actions .btn { flex: 1 1 auto; }
+  .step { padding-left: 40px; }
+}
+/* Celular: cada fila de la tabla se convierte en una tarjeta (sin desplazamiento lateral). */
+@media (max-width: 720px) {
+  .table-wrap { border: 0; max-height: none; overflow: visible; }
+  #mainTable, #mainTable tbody, #mainTable tfoot, #mainTable tr, #mainTable td { display: block; width: 100%; }
+  #mainTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  #mainTable tbody tr, #mainTable tfoot tr { display: flex; flex-direction: column; }
+  #mainTable tbody tr { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 14px; margin-bottom: 10px; }
+  #mainTable tbody tr:hover td { background: none; }
+  #mainTable tfoot tr { background: #edf1f4; border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 14px; }
+  #mainTable tfoot td { position: static; background: none; border: 0; }
+  #mainTable td { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; padding: 4px 0; border: 0; text-align: right; min-width: 0; white-space: normal; }
+  #mainTable td::before { content: attr(data-label); flex: none; max-width: 48%; text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  #mainTable td.name { order: -1; display: block; text-align: left; font-family: var(--display); font-size: 16px; font-weight: 600; padding: 0 0 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line-soft); }
+  #mainTable td.name::before, #mainTable td.empty::before, #mainTable td:not([data-label])::before { content: none; }
+  #mainTable td:empty, #mainTable tfoot td:not([data-label]):not(.name) { display: none; }
+  #mainTable td.empty { display: block; text-align: center; }
+  #mainTable td.num { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------------------------------- Impresión ---------------------------------- */
+@media print {
+  @page { size: A4 landscape; margin: 12mm 12mm 14mm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 8pt "Segoe UI", sans-serif; color: #555; } }
+  body { background: #fff; font-size: 9.5pt; }
+  .site, .tabs, .no-print, .ribbon, .toolbar, #importPanel, .toast, .skip, .site-foot, .notice, .alerts { display: none !important; }
+  .wrap { max-width: none; padding: 0; }
+  .print-only { display: block; }
+  .panel { border: 0; padding: 0; }
+  .panel__head { margin-bottom: 6px; }
+  .kpis { margin: 8px 0; border-color: #999; }
+  .kpi { padding: 6px 10px; }
+  .kpi--danger { background: none; }
+  .kpi__value { font-size: 15pt; }
+  .table-wrap { max-height: none; overflow: visible; border: 0; }
+  table { font-size: 8.5pt; }
+  thead { display: table-header-group; }
+  tfoot { display: table-row-group; }
+  thead th { position: static; background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  thead th > span, thead th > button { padding: 5px 6px; }
+  .sort-ind { display: none; }
+  td { padding: 4px 6px; white-space: normal; }
+  tfoot td { position: static; }
+  tr { break-inside: avoid; }
+  .print-head { border-bottom: 2px solid #15222e; padding-bottom: 6px; margin-bottom: 8px; }
+  .print-head h2 { font-size: 15pt; }
+  .print-head p, .print-foot p { font-size: 8.5pt; color: #333; margin-top: 2px; }
+  .print-foot { margin-top: 8px; border-top: 1px solid #999; padding-top: 6px; }
+  .swatch, .tag-neg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+
+<header class="site">
+  <div class="wrap site__bar">
+    <div>
+      <p class="site__kicker">Inteligencia financiera territorial</p>
+      <h1 class="site__title">Monitor de Obras y Servicios por Impuestos</h1>
+    </div>
+    <p class="site__status"><span id="normaTag">TMCA 2026</span><span class="pill pill--warn">Prototipo: no certifica disponibilidad</span></p>
+  </div>
+</header>
+
+<main id="contenido" class="wrap" tabindex="-1">
+
+  <!-- Cinta nacional: el tope en sus dos bloques de gobierno -->
+  <section class="ribbon" aria-labelledby="ribbonTitle">
+    <div class="ribbon__head">
+      <div>
+        <h2 id="ribbonTitle" class="ribbon__label">Tope máximo nacional de capacidad anual</h2>
+        <p class="ribbon__total" id="ribbonTotal">—</p>
+      </div>
+      <p class="ribbon__note" id="ribbonNote"></p>
+    </div>
+    <div class="ribbon__bar" id="ribbonBar" role="img"></div>
+    <dl class="ribbon__legend" id="ribbonLegend"></dl>
+  </section>
+
+  <nav class="tabs no-print" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" id="tabSummary" aria-controls="queryPanel" aria-selected="true">Resumen por departamento</button>
+    <button type="button" role="tab" id="tabDetail" aria-controls="queryPanel" aria-selected="false" tabindex="-1">Consulta por entidad</button>
+    <button type="button" role="tab" id="tabImport" aria-controls="importPanel" aria-selected="false" tabindex="-1">Cargar anexos y respaldo</button>
+  </nav>
+
+  <!-- ============================ CONSULTA ============================ -->
+  <section class="panel" id="queryPanel" role="tabpanel" aria-labelledby="scopeTitle">
+    <div class="print-head print-only" id="printHead"></div>
+
+    <div class="panel__head">
+      <div>
+        <h2 id="scopeTitle">Capacidad por departamento</h2>
+        <p class="sub" id="scopeSub"></p>
+      </div>
+      <label class="inline-field no-print" id="summarySourceWrap">Fuente del resumen
+        <select id="summarySource">
+          <option value="ref">Referencia v1: 10 departamentos, redondeada</option>
+          <option value="data">Anexos importados: montos exactos</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="filters no-print" role="search">
+      <label class="f-search">Buscar entidad, territorio o código
+        <input type="search" id="query" autocomplete="off" spellcheck="false" placeholder="Ej.: Zarumilla, Los Órganos, 240101">
+      </label>
+      <label>Departamento<select id="dep"></select></label>
+      <label>Nivel de gobierno
+        <select id="level"><option value="Todos">Regional y local</option><option value="Regional">Solo regional</option><option value="Local">Solo local</option></select>
+      </label>
+      <label id="provLabel">Provincia<select id="prov"></select></label>
+      <label id="distLabel">Distrito<select id="dist"></select></label>
+      <label>Ordenar por
+        <select id="sort">
+          <option value="amountDesc">Mayor tope</option><option value="amountAsc">Menor tope</option>
+          <option value="nameAsc">Nombre (A–Z)</option><option value="depAsc">Departamento (A–Z)</option>
+        </select>
+      </label>
+      <button type="button" class="btn btn--ghost f-reset" id="reset">Limpiar filtros</button>
+    </div>
+
+    <div class="kpis" aria-live="polite">
+      <div class="kpi"><p class="kpi__label">Tope de la selección</p><p class="kpi__value" id="selectedAmount">—</p><p class="kpi__hint" id="selectedUnit"></p></div>
+      <div class="kpi"><p class="kpi__label" id="countLabel">Departamentos</p><p class="kpi__value" id="selectedCount">—</p><p class="kpi__hint" id="countHint">Resultados con los filtros actuales</p></div>
+      <div class="kpi" id="balanceKpi"><p class="kpi__label">Saldo calculado</p><p class="kpi__value" id="selectedBalance">N/D</p><p class="kpi__hint" id="balanceLabel">Pendiente de verificar</p></div>
+    </div>
+
+    <div class="notice" id="coverageNotice" role="note"></div>
+    <ul class="alerts" id="dataAlerts" aria-live="polite"></ul>
+
+    <div class="toolbar">
+      <p class="sub" id="filterSummary"></p>
+      <div class="toolbar__actions no-print">
+        <button type="button" class="btn" id="csv">Exportar CSV</button>
+        <button type="button" class="btn" id="xlsx">Exportar Excel</button>
+        <button type="button" class="btn btn--primary" id="print">Imprimir o guardar PDF</button>
+      </div>
+    </div>
+
+    <div class="table-wrap" tabindex="0" role="region" aria-labelledby="tableCaption">
+      <table id="mainTable">
+        <caption id="tableCaption" class="sr-only">Resultados</caption>
+        <thead id="headRows"></thead>
+        <tbody id="bodyRows"></tbody>
+        <tfoot id="footRows"></tfoot>
+      </table>
+    </div>
+    <nav class="pager no-print" aria-label="Paginación">
+      <button type="button" class="btn btn--small" id="prev">Anterior</button>
+      <span class="sub" id="pageInfo" aria-live="polite"></span>
+      <button type="button" class="btn btn--small" id="next">Siguiente</button>
+    </nav>
+    <div class="print-foot print-only" id="printFoot"></div>
+  </section>
+
+  <section class="panel no-print" id="chartPanel" aria-labelledby="chartTitle">
+    <div class="panel__head">
+      <h2 id="chartTitle">Mayores topes de la selección</h2>
+      <p class="chart-key" id="chartKey"></p>
+    </div>
+    <ol class="chart" id="chart"></ol>
+  </section>
+
+  <!-- ============================ IMPORTACIÓN ============================ -->
+  <section class="panel hidden" id="importPanel" role="tabpanel" aria-labelledby="importTitle">
+    <div class="panel__head"><div><h2 id="importTitle">Cargar anexos oficiales</h2>
+      <p class="sub">Los archivos se leen en este equipo. No se envían a ningún servidor ni se modifica el original.</p></div></div>
+
+    <div class="import-grid">
+      <ol class="steps">
+        <li class="step">
+          <h3>Descarga el anexo del MEF</h3>
+          <p>El servidor oficial no permite la descarga automática. Ábrelo y guárdalo en tu equipo.</p>
+          <div class="link-row" id="sourceLinks"></div>
+        </li>
+        <li class="step">
+          <h3>Elige el archivo</h3>
+          <div class="drop" id="dropZone">
+            <label for="file" class="drop__label">Arrastra aquí el XLSX o CSV, o <span class="link-like">búscalo en tu equipo</span></label>
+            <input id="file" type="file" accept=".xlsx,.csv,.tsv,text/csv">
+            <p class="sub" id="fileLimits"></p>
+          </div>
+          <p class="status" id="fileStatus" role="status">Ningún archivo seleccionado.</p>
+        </li>
+        <li class="step" id="mapStep" hidden>
+          <h3>Indica qué contiene cada columna</h3>
+          <div class="mapper">
+            <label>Tipo de anexo<select id="importLevel"><option value="Local">Gobiernos locales</option><option value="Regional">Gobiernos regionales</option></select></label>
+            <label>Hoja<select id="sheetChoice"></select></label>
+            <label>Fila de encabezados<input id="headerRow" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+            <label>Departamento <span class="req">obligatorio</span><select id="mapDep" data-field="dep"></select></label>
+            <label>Provincia <span class="req" id="provReq">obligatorio</span><select id="mapProv" data-field="prov"></select></label>
+            <label>Distrito<select id="mapDist" data-field="dist"></select></label>
+            <label>Entidad <span class="req">obligatorio</span><select id="mapName" data-field="name"></select></label>
+            <label>Tope autorizado <span class="req">obligatorio</span><select id="mapAmount" data-field="amount"></select></label>
+            <label>Código o ubigeo<select id="mapCode" data-field="code"></select></label>
+            <label>Unidad del importe<select id="importUnit"><option value="1">Soles</option><option value="1000">Miles de soles</option><option value="1000000">Millones de soles</option></select></label>
+            <label>Separador decimal en celdas de texto
+              <select id="decimalSep"><option value="auto">Automático (avisa si hay duda)</option><option value=".">Punto: 1,234.56</option><option value=",">Coma: 1.234,56</option></select></label>
+            <label>Total oficial del anexo, para conciliar
+              <input id="controlTotal" type="text" inputmode="decimal" placeholder="En la misma unidad del importe"></label>
+            <label>Compromisos posteriores netos<select id="mapCommitted" data-field="committed"></select></label>
+            <label>Fecha de corte de compromisos<input id="commitDate" type="date"></label>
+          </div>
+          <p class="sub">Use la columna de compromisos solo con datos completos y verificados, netos de adendas y liberaciones, posteriores al tope vigente. Una celda vacía se registra como N/D, nunca como cero.</p>
+          <div class="preview" id="preview" tabindex="0" role="region" aria-label="Vista previa del archivo"></div>
+          <div class="actions"><button type="button" class="btn btn--primary" id="reviewImport">Revisar importación</button></div>
+        </li>
+        <li class="step" id="reviewStep" hidden>
+          <h3>Revisa y confirma</h3>
+          <div id="review" aria-live="polite"></div>
+          <label class="check hidden" id="ackWrap"><input type="checkbox" id="ackDiff"> Entiendo que el total no coincide con el total oficial y deseo importar de todos modos.</label>
+          <div class="actions"><button type="button" class="btn btn--primary" id="confirmImport" disabled>Importar y reemplazar este nivel</button></div>
+        </li>
+      </ol>
+
+      <aside class="base" aria-labelledby="baseTitle">
+        <h3 id="baseTitle">Base guardada en este navegador</h3>
+        <p class="sub">No es un respaldo ni se comparte con otros usuarios. Descarga un respaldo antes de borrar el historial del navegador.</p>
+        <dl class="base__counts" id="baseCounts"></dl>
+        <div class="actions actions--stack">
+          <button type="button" class="btn" id="undoRegional" disabled>Deshacer última carga regional</button>
+          <button type="button" class="btn" id="undoLocal" disabled>Deshacer última carga local</button>
+          <button type="button" class="btn" id="backup">Descargar respaldo (.json)</button>
+          <label class="btn btn--file" for="restore">Restaurar respaldo<input id="restore" type="file" accept=".json,application/json"></label>
+          <button type="button" class="btn btn--danger" id="clearData">Eliminar datos importados</button>
+        </div>
+        <h4>Historial de cargas</h4>
+        <ol class="log" id="batchLog"></ol>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <p><strong>Fuentes.</strong> <span id="footSources"></span></p>
+    <p id="footNote"></p>
+  </footer>
+</main>
+
+<dialog id="dialog" aria-labelledby="dialogTitle">
+  <form method="dialog">
+    <h2 id="dialogTitle"></h2>
+    <div id="dialogBody"></div>
+    <div class="actions actions--end">
+      <button type="submit" value="cancel" class="btn" id="dialogCancel">Cancelar</button>
+      <button type="submit" value="ok" class="btn btn--primary" id="dialogOk">Aceptar</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>(function () {
+/* --- 01_config.js --- */
+/* ==========================================================================
+ * 01_config.js — Parámetros del ejercicio.
+ * Todo dato normativo, fecha, cifra de referencia o límite técnico vive aquí.
+ * Para un nuevo ejercicio fiscal se edita solo este archivo (hallazgo H14).
+ * ========================================================================== */
+'use strict';
+
+var OxI = (typeof OxI !== 'undefined') ? OxI : {};
+
+OxI.CONFIG = Object.freeze({
+  version: '2.0.0',
+  anio: 2026,
+  norma: 'D.S. N.º 121-2026-EF',
+  fechaPublicacion: '2026-06-28',
+  // Primer día en que un corte de compromisos puede ser posterior al tope.
+  fechaMinimaCorte: '2026-06-29',
+  fechaConsultaFuentes: '2026-11-25',
+
+  // Referencias nacionales redondeadas a millones (no son conciliación exacta).
+  nacional: Object.freeze({
+    regionalMillones: 34401,   // incluye Lima Metropolitana
+    localMillones: 33178,
+    municipalidades: 1892,     // dato declarado por la v1: por verificar
+  }),
+
+  // Diez departamentos de la v1, en millones de soles redondeados.
+  referencia: Object.freeze([
+    ['Amazonas', 795, 223], ['Áncash', 2082, 3618], ['Cajamarca', 1631, 953],
+    ['Cusco', 2134, 7529], ['La Libertad', 2023, 1042], ['Lambayeque', 1235, 244],
+    ['Loreto', 2294, 782], ['Piura', 2657, 1614], ['San Martín', 1722, 443],
+    ['Tumbes', 398, 201],
+  ]),
+
+  // Límites de seguridad para archivos no confiables (hallazgo H09).
+  limites: Object.freeze({
+    archivoBytes: 25 * 1024 * 1024,        // 25 MB por archivo
+    zipEntradas: 2000,                     // entradas en el directorio ZIP
+    entradaBytes: 80 * 1024 * 1024,        // 80 MB descomprimidos por XML
+    totalBytes: 200 * 1024 * 1024,         // 200 MB descomprimidos en total
+    filas: 60000,                          // filas por hoja
+    columnas: 200,                         // columnas por hoja
+    celdaCaracteres: 2000,                 // caracteres por celda
+    hojas: 50,                             // hojas por libro
+    respaldoBytes: 20 * 1024 * 1024,       // 20 MB por respaldo JSON
+  }),
+
+  pagina: 30,
+  claveAlmacen: 'monitor_oxi_2026_v2',
+  claveAlmacenV1: 'monitor_oxi_2026_v1',
+
+  fuentes: Object.freeze([
+    Object.freeze({ id: 'F01', etiqueta: 'Anexo 1: gobiernos regionales (XLSX)', url: 'https://cdn.www.gob.pe/uploads/document/file/10220093/8307590-anexo-1-topes-gobiernos-regionales.xlsx?v=1782752168', descarga: true }),
+    Object.freeze({ id: 'F02', etiqueta: 'Anexo 2: gobiernos locales (XLSX)', url: 'https://cdn.www.gob.pe/uploads/document/file/10220095/8307590-anexo-2-topes-gobiernos-locales.xlsx?v=1782752168', descarga: true }),
+    Object.freeze({ id: 'F03', etiqueta: 'Portal MEF: límite CIPRL', url: 'https://mef.gob.pe/es/obras-por-impuestos/limite-ciprl', descarga: true }),
+    Object.freeze({ id: 'F04', etiqueta: 'MEF: D.S. N.º 121-2026-EF', url: 'https://www.gob.pe/institucion/mef/normas-legales/8307590-121-2026-ef' }),
+    Object.freeze({ id: 'F05', etiqueta: 'MEF: nota nacional del 29/06/2026', url: 'https://www.gob.pe/institucion/mef/noticias/1412566-gobierno-eleva-a-cerca-de-s-70-000-millones-la-capacidad-para-ejecutar-proyectos-bajo-obras-por-impuestos' }),
+    Object.freeze({ id: 'F06', etiqueta: 'PROINVERSIÓN: Foro Nororiente 23/10/2026', url: 'https://www.investinperu.pe/wp-content/uploads/2026/10/humberto-maydana-ppt-2026.10.23-foro-nororiente-invierte-app-pa-y-oxi-vf.pdf' }),
+    Object.freeze({ id: 'F07', etiqueta: 'PROINVERSIÓN: Cusco', url: 'https://www.investinperu.pe/proinversion-obras-por-impuestos-impulsa-mas-colegios-mejores-vias-y-servicios-para-las-familias-de-cusco/' }),
+  ]),
+});
+
+/* --- 02_util.js --- */
+/* ==========================================================================
+ * 02_util.js — Utilidades puras: texto, montos en céntimos, formato, fechas.
+ * Regla de oro: los importes se guardan y suman como céntimos enteros, para
+ * evitar errores de coma flotante (0,1 + 0,2 ≠ 0,3).
+ * ========================================================================== */
+'use strict';
+
+OxI.util = (function () {
+  const C = OxI.CONFIG;
+
+  /** Normaliza para buscar: sin tildes, minúsculas, espacios simples. */
+  function norm(v) {
+    return String(v ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  /** Limpia texto de celda: quita controles, colapsa espacios y recorta. */
+  function clean(v, max) {
+    const s = String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
+      .replace(/\s+/g, ' ').trim();
+    return s.length > (max || C.limites.celdaCaracteres) ? s.slice(0, max || C.limites.celdaCaracteres) : s;
+  }
+
+  const nf0 = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 0 });
+  const nf1 = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  const nf2 = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const entero = n => nf0.format(n);
+
+  /** Céntimos → "1,234,567.89" (sin símbolo). */
+  function soles(c) {
+    if (c === null || c === undefined || !Number.isFinite(c)) return 'N/D';
+    return nf2.format(c / 100);
+  }
+
+  /** Céntimos → "S/ 1,234,567.89" o "N/D". */
+  function money(c) {
+    return (c === null || c === undefined || !Number.isFinite(c)) ? 'N/D' : 'S/ ' + soles(c);
+  }
+
+  /** Céntimos → "S/ 33,620 M" (millones con un decimal como máximo). */
+  function compact(c) {
+    if (c === null || c === undefined || !Number.isFinite(c)) return 'N/D';
+    const s = c / 100;
+    if (Math.abs(s) >= 1e6) return 'S/ ' + nf1.format(s / 1e6) + ' M';
+    return money(c);
+  }
+
+  /** Céntimos → millones de soles con un decimal como máximo (texto). */
+  function millones(c) {
+    return nf1.format(c / 100 / 1e6);
+  }
+
+  /** Suma segura de céntimos enteros. */
+  function sum(list, pick) {
+    let t = 0;
+    for (const x of list) t += pick(x);
+    return t;
+  }
+
+  /** Fecha local de hoy en formato AAAA-MM-DD. */
+  function hoyISO(d) {
+    const x = d || new Date();
+    const p = n => String(n).padStart(2, '0');
+    return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
+  }
+
+  /** "2026-11-25" → "25/11/2026". */
+  function fechaPE(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : '—';
+  }
+
+  function esFechaISO(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(s || ''))) return false;
+    const d = new Date(s + 'T00:00:00Z');
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+  }
+
+  /** Texto apto para nombre de archivo. */
+  function slug(s) {
+    return norm(s).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 40) || 'consulta';
+  }
+
+  function uniqSorted(values) {
+    return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  }
+
+  /** Identificador corto no criptográfico para lotes. */
+  function nuevoId(prefijo) {
+    const r = (globalThis.crypto && crypto.getRandomValues)
+      ? Array.from(crypto.getRandomValues(new Uint8Array(6)), b => b.toString(16).padStart(2, '0')).join('')
+      : Math.random().toString(16).slice(2, 14);
+    return prefijo + '-' + Date.now().toString(36) + '-' + r;
+  }
+
+  return { norm, clean, entero, soles, money, compact, millones, sum, hoyISO, fechaPE, esFechaISO, slug, uniqSorted, nuevoId };
+})();
+
+/* --- 03_parse.js --- */
+/* ==========================================================================
+ * 03_parse.js — Lectura de números y CSV, y escritura segura de CSV.
+ * Corrige: "S/. 1,234.00" descartado, notación científica de Excel,
+ * negativos contables, separadores ambiguos (H08) e inyección de fórmulas (H10).
+ * ========================================================================== */
+'use strict';
+
+OxI.parse = (function () {
+  const L = OxI.CONFIG.limites;
+
+  class ParseError extends Error {}
+
+  /**
+   * Interpreta un importe.
+   * @param v valor de celda (número de XLSX o texto)
+   * @param decimal 'auto' | '.' | ','  — separador decimal de los textos
+   * @returns {{value:number, ambiguous:boolean}|null}
+   *   ambiguous = true cuando "1.234" o "1,234" podría leerse de dos formas.
+   */
+  function parseNum(v, decimal) {
+    const mode = decimal || 'auto';
+    if (typeof v === 'number') return Number.isFinite(v) ? { value: v, ambiguous: false } : null;
+    let s = String(v ?? '').replace(/[\s  ]/g, '');
+    if (!s || /^[-–—]+$/.test(s) || /^n\/?d$/i.test(s)) return null;
+    s = s.replace(/^S\/\.?/i, '');              // símbolo de moneda: S/ o S/.
+    let neg = false;
+    if (/^\(.+\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+    if (s[0] === '-' || s[0] === '−') { if (neg) return null; neg = true; s = s.slice(1); }
+    if (!s) return null;
+
+    let value = null, ambiguous = false;
+    const sci = /^\d+(\.\d+)?[eE][+-]?\d+$/;
+    if (sci.test(s)) {
+      value = Number(s);
+    } else if (mode === '.') {
+      if (/^\d+(\.\d+)?$/.test(s) || /^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) value = Number(s.replace(/,/g, ''));
+    } else if (mode === ',') {
+      if (/^\d+(,\d+)?$/.test(s) || /^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) value = Number(s.replace(/\./g, '').replace(',', '.'));
+    } else {
+      if (/^\d+(\.\d+)?$/.test(s)) {
+        value = Number(s); ambiguous = /^\d{1,3}\.\d{3}$/.test(s);
+      } else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) {
+        value = Number(s.replace(/,/g, '')); ambiguous = /^\d{1,3},\d{3}$/.test(s);
+      } else if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) {
+        value = Number(s.replace(/\./g, '').replace(',', '.'));
+      } else if (/^\d+,\d+$/.test(s)) {
+        value = Number(s.replace(',', '.'));
+      }
+    }
+    if (value === null || !Number.isFinite(value)) return null;
+    return { value: neg ? -value : value, ambiguous };
+  }
+
+  /** Convierte a céntimos enteros aplicando la unidad (1, 1 000 o 1 000 000). */
+  function toCents(value, unit) {
+    const c = Math.round(value * unit * 100);
+    return Number.isSafeInteger(c) ? c : null;
+  }
+
+  /** Detecta separador en la primera línea con datos, ignorando comillas. */
+  function detectSep(text) {
+    const line = (text.split(/\r?\n/).find(x => x.trim()) || '').replace(/"[^"]*"/g, '');
+    const count = ch => line.split(ch).length - 1;
+    return [';', '\t', ','].sort((a, b) => count(b) - count(a))[0];
+  }
+
+  /** CSV/TSV con comillas, BOM y celdas multilínea. Aplica límites de filas y columnas. */
+  function parseCSV(text) {
+    text = String(text).replace(/^﻿/, '');
+    const sep = detectSep(text), rows = [];
+    let row = [], cell = '', quote = false;
+    const pushCell = () => {
+      if (row.length >= L.columnas) throw new ParseError('El archivo supera ' + L.columnas + ' columnas.');
+      row.push(cell.length > L.celdaCaracteres ? cell.slice(0, L.celdaCaracteres) : cell); cell = '';
+    };
+    const pushRow = () => {
+      if (rows.length >= L.filas) throw new ParseError('El archivo supera ' + L.filas.toLocaleString('es-PE') + ' filas.');
+      rows.push(row); row = [];
+    };
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === '"') {
+        if (quote && text[i + 1] === '"') { cell += '"'; i++; } else quote = !quote;
+      } else if (!quote && c === sep) {
+        pushCell();
+      } else if (!quote && (c === '\n' || c === '\r')) {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        pushCell(); pushRow();
+      } else cell += c;
+    }
+    if (quote) throw new ParseError('El archivo tiene comillas sin cerrar. Revisa el CSV o guárdalo de nuevo desde Excel.');
+    if (cell || row.length) { pushCell(); pushRow(); }
+    return rows;
+  }
+
+  /**
+   * Celda CSV segura. Los números van sin comillas; el texto que Excel podría
+   * ejecutar como fórmula (aun con espacios o controles delante) se antepone con '.
+   */
+  function csvCell(v) {
+    if (typeof v === 'number') return Number.isFinite(v) ? String(v) : '';
+    let s = String(v ?? '');
+    if (/^[\s\u0000-\u001f]*[=+\-@＝＋－＠]/.test(s) || /^[\t\r\n]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  /** Filas de totales, subtotales, notas o fuentes que no son entidades. */
+  function isTotal(v) {
+    return /^(sub\s*total|total(\s|:|$)|totales(\s|$)|nota(s)?(\s|:|$)|fuente(s)?(\s|:|$)|elaboraci[oó]n(\s|:|$))/i.test(OxI.util.norm(v));
+  }
+
+  return { ParseError, parseNum, toCents, parseCSV, csvCell, isTotal, detectSep };
+})();
+
+/* --- 04_zip.js --- */
+/* ==========================================================================
+ * 04_zip.js — Lector ZIP endurecido y escritor ZIP mínimo (sin compresión).
+ * El lector valida firmas y límites, rechaza ZIP cifrados, multivolumen y
+ * ZIP64, y corta la descompresión al superar el tope (bomba ZIP). (H09)
+ * ========================================================================== */
+'use strict';
+
+OxI.zip = (function () {
+  const L = OxI.CONFIG.limites;
+  class ZipError extends Error {}
+
+  const SIG_EOCD = 0x06054b50, SIG_CEN = 0x02014b50, SIG_LOC = 0x04034b50;
+
+  async function inflateRaw(bytes, cap) {
+    if (typeof DecompressionStream === 'undefined') {
+      throw new ZipError('Este navegador no puede leer XLSX. Usa Chrome, Edge o Firefox actualizado, o guarda el anexo como CSV.');
+    }
+    const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+    const parts = []; let total = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.length;
+        if (total > cap) { try { await reader.cancel(); } catch (e) { /* ya cerrado */ } throw new ZipError('Una parte del archivo se expande más allá del límite permitido. Puede estar dañado o ser malicioso.'); }
+        parts.push(value);
+      }
+    } catch (e) {
+      if (e instanceof ZipError) throw e;
+      throw new ZipError('El contenido comprimido está dañado.');
+    }
+    const out = new Uint8Array(total); let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    return out;
+  }
+
+  /**
+   * Lee solo las entradas que cumplen `wanted(nombre)`.
+   * @returns {Promise<Object<string,string>>} nombre → texto UTF-8
+   */
+  async function readZip(buffer, wanted, limits) {
+    const lim = Object.assign({}, L, limits || {});
+    if (!(buffer instanceof ArrayBuffer)) throw new ZipError('Entrada inválida.');
+    if (buffer.byteLength > lim.archivoBytes) throw new ZipError('El archivo supera el tamaño máximo permitido.');
+    if (buffer.byteLength < 22) throw new ZipError('El archivo no es un XLSX válido.');
+    const view = new DataView(buffer), arr = new Uint8Array(buffer), len = arr.length;
+
+    let end = -1;
+    for (let i = len - 22; i >= Math.max(0, len - 65557); i--) {
+      if (view.getUint32(i, true) === SIG_EOCD) { end = i; break; }
+    }
+    if (end < 0) throw new ZipError('El archivo no es un XLSX válido.');
+    if (view.getUint16(end + 4, true) !== 0 || view.getUint16(end + 6, true) !== 0) throw new ZipError('No se admiten archivos ZIP divididos en varias partes.');
+    const count = view.getUint16(end + 10, true), cenSize = view.getUint32(end + 12, true), cenOff = view.getUint32(end + 16, true);
+    if (count === 0xffff || cenOff === 0xffffffff || cenSize === 0xffffffff) throw new ZipError('Formato ZIP64 no admitido. Guarda el archivo de nuevo desde Excel.');
+    if (count > lim.zipEntradas) throw new ZipError('El archivo contiene demasiadas partes internas.');
+    if (cenOff + cenSize > end) throw new ZipError('Directorio interno del XLSX dañado.');
+
+    const dec = new TextDecoder('utf-8');
+    const out = {}; let pos = cenOff, totalOut = 0;
+    for (let i = 0; i < count; i++) {
+      if (pos + 46 > end || view.getUint32(pos, true) !== SIG_CEN) throw new ZipError('Directorio interno del XLSX dañado.');
+      const flags = view.getUint16(pos + 8, true), method = view.getUint16(pos + 10, true);
+      const csize = view.getUint32(pos + 20, true), usize = view.getUint32(pos + 24, true);
+      const nl = view.getUint16(pos + 28, true), ex = view.getUint16(pos + 30, true), cm = view.getUint16(pos + 32, true);
+      const offset = view.getUint32(pos + 42, true);
+      if (pos + 46 + nl > end) throw new ZipError('Directorio interno del XLSX dañado.');
+      const name = dec.decode(arr.subarray(pos + 46, pos + 46 + nl));
+      pos += 46 + nl + ex + cm;
+      if (!wanted(name)) continue;
+      if (flags & 0x1) throw new ZipError('El archivo está protegido con contraseña. Quita la protección y vuelve a intentarlo.');
+      if (offset + 30 > len || view.getUint32(offset, true) !== SIG_LOC) throw new ZipError('Parte interna del XLSX dañada: ' + name);
+      const start = offset + 30 + view.getUint16(offset + 26, true) + view.getUint16(offset + 28, true);
+      if (start + csize > len) throw new ZipError('Parte interna del XLSX incompleta: ' + name);
+      if (usize > lim.entradaBytes) throw new ZipError('Una parte del archivo supera el límite de tamaño permitido.');
+      const chunk = arr.subarray(start, start + csize);
+      let raw;
+      if (method === 0) raw = chunk;
+      else if (method === 8) raw = await inflateRaw(chunk, Math.min(lim.entradaBytes, lim.totalBytes - totalOut));
+      else throw new ZipError('Método de compresión no admitido en ' + name + '.');
+      totalOut += raw.length;
+      if (totalOut > lim.totalBytes) throw new ZipError('El archivo descomprimido supera el límite permitido.');
+      out[name] = dec.decode(raw);
+    }
+    return out;
+  }
+
+  /* ---------------------------- Escritor ZIP ---------------------------- */
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  function crc32(bytes) {
+    let c = 0xffffffff;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  /** Crea un ZIP sin compresión. @param files [{name, text}] @returns Uint8Array */
+  function writeZip(files) {
+    const enc = new TextEncoder(), locals = [], centrals = [];
+    let offset = 0;
+    const d = new Date();
+    const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    for (const f of files) {
+      const name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+      const loc = new Uint8Array(30 + name.length), lv = new DataView(loc.buffer);
+      lv.setUint32(0, SIG_LOC, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0x0800, true);
+      lv.setUint16(8, 0, true); lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
+      lv.setUint32(14, crc, true); lv.setUint32(18, data.length, true); lv.setUint32(22, data.length, true);
+      lv.setUint16(26, name.length, true); lv.setUint16(28, 0, true); loc.set(name, 30);
+      const cen = new Uint8Array(46 + name.length), cv = new DataView(cen.buffer);
+      cv.setUint32(0, SIG_CEN, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0x0800, true);
+      cv.setUint16(10, 0, true); cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
+      cv.setUint32(16, crc, true); cv.setUint32(20, data.length, true); cv.setUint32(24, data.length, true);
+      cv.setUint16(28, name.length, true); cv.setUint32(42, offset, true); cen.set(name, 46);
+      locals.push(loc, data); centrals.push(cen);
+      offset += loc.length + data.length;
+    }
+    const cenSize = centrals.reduce((s, c) => s + c.length, 0);
+    const eocd = new Uint8Array(22), ev = new DataView(eocd.buffer);
+    ev.setUint32(0, SIG_EOCD, true); ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cenSize, true); ev.setUint32(16, offset, true);
+    const all = [...locals, ...centrals, eocd], out = new Uint8Array(offset + cenSize + 22);
+    let o = 0;
+    for (const p of all) { out.set(p, o); o += p.length; }
+    return out;
+  }
+
+  return { ZipError, readZip, writeZip, crc32 };
+})();
+
+/* --- 05_xlsx.js --- */
+/* ==========================================================================
+ * 05_xlsx.js — Lectura y escritura de XLSX (SpreadsheetML) sin librerías.
+ * Lectura: analizador acotado por expresiones regulares (sin DOMParser), que
+ * no expande entidades XML, rechaza DOCTYPE, no evalúa fórmulas (usa el valor
+ * guardado por Excel), marca celdas con error y omite la guía fonética (rPh).
+ * Escritura: libro con textos en línea, de modo que los códigos conservan
+ * los ceros iniciales y ninguna celda se interpreta como fórmula (H10).
+ * ========================================================================== */
+'use strict';
+
+OxI.xlsx = (function () {
+  const L = OxI.CONFIG.limites;
+  const { ZipError, readZip, writeZip } = OxI.zip;
+
+  /** Valor de una celda con error de Excel (#N/A, #¡REF!, …). */
+  class CellError {
+    constructor(code) { this.code = code; }
+    toString() { return this.code; }
+  }
+
+  const P = '(?:[A-Za-z_][\\w.-]*:)?';            // prefijo de espacio de nombres opcional
+  const reTag = (name) => new RegExp('<' + P + name + '\\b([^>]*?)(?:/>|>([\\s\\S]*?)</' + P + name + '>)', 'g');
+
+  function decodeXml(s) {
+    return String(s).replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);/g, (m, e) => {
+      if (e === 'amp') return '&'; if (e === 'lt') return '<'; if (e === 'gt') return '>';
+      if (e === 'quot') return '"'; if (e === 'apos') return "'";
+      const cp = e[1] === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      return (cp > 0 && cp <= 0x10ffff) ? String.fromCodePoint(cp) : '';
+    }).replace(/_x([0-9A-Fa-f]{4})_/g, (m, h) => String.fromCharCode(parseInt(h, 16)));
+  }
+
+  function attrs(s) {
+    const o = {};
+    String(s || '').replace(/([\w:.-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g, (m, k, a, b) => { o[k] = decodeXml(a ?? b); return m; });
+    return o;
+  }
+  const attr = (o, local) => o[local] ?? o[Object.keys(o).find(k => k.endsWith(':' + local))];
+
+  function guard(text, name) {
+    if (typeof text !== 'string') return '';
+    if (/<!DOCTYPE/i.test(text) || /<!ENTITY/i.test(text)) throw new ZipError('El archivo contiene declaraciones XML no permitidas (' + name + ').');
+    return text;
+  }
+
+  /** Texto de <si> o <is>: concatena <t>, omitiendo la guía fonética <rPh>. */
+  function richText(inner) {
+    const sinFonetica = String(inner || '').replace(new RegExp('<' + P + 'rPh\\b[\\s\\S]*?</' + P + 'rPh>', 'g'), '');
+    let out = '';
+    for (const m of sinFonetica.matchAll(reTag('t'))) out += decodeXml(m[2] || '');
+    return out;
+  }
+
+  function colIndex(ref) {
+    const letters = /^([A-Z]{1,3})\d*$/i.exec(String(ref || ''));
+    if (!letters) return -1;
+    let n = 0;
+    for (const c of letters[1].toUpperCase()) n = n * 26 + (c.charCodeAt(0) - 64);
+    return n - 1;
+  }
+
+  function resolveTarget(target) {
+    let t = String(target || '');
+    if (t.startsWith('/')) return t.slice(1);
+    t = 'xl/' + t.replace(/^\.\//, '');
+    const parts = [];
+    for (const seg of t.split('/')) { if (seg === '..') parts.pop(); else if (seg && seg !== '.') parts.push(seg); }
+    return parts.join('/');
+  }
+
+  function parseSheet(xml, shared, sheetName) {
+    const rows = []; let autoRow = 0;
+    const warnings = [];
+    for (const rm of xml.matchAll(reTag('row'))) {
+      const ra = attrs(rm[1]);
+      let r = Number(ra.r) - 1;
+      if (!Number.isInteger(r) || r < 0) r = autoRow;
+      autoRow = r + 1;
+      if (r >= L.filas) throw new ZipError('La hoja «' + sheetName + '» supera ' + L.filas.toLocaleString('es-PE') + ' filas.');
+      const row = []; let autoCol = 0;
+      for (const cm of String(rm[2] || '').matchAll(reTag('c'))) {
+        const ca = attrs(cm[1]), inner = cm[2] || '';
+        let j = ca.r ? colIndex(ca.r) : autoCol;
+        if (j < 0) j = autoCol;
+        autoCol = j + 1;
+        if (j >= L.columnas) { if (!warnings.length) warnings.push('Se ignoraron columnas posteriores a la ' + L.columnas + '.'); continue; }
+        const vm = new RegExp('<' + P + 'v\\b[^>]*>([\\s\\S]*?)</' + P + 'v>').exec(inner);
+        const v = vm ? decodeXml(vm[1]) : '';
+        const t = ca.t || 'n';
+        let val;
+        if (t === 's') val = shared[Number(v)] ?? '';
+        else if (t === 'inlineStr') val = richText((new RegExp('<' + P + 'is\\b[^>]*>([\\s\\S]*?)</' + P + 'is>').exec(inner) || [])[1]);
+        else if (t === 'str' || t === 'd') val = v;
+        else if (t === 'b') val = v === '1' ? 'VERDADERO' : 'FALSO';
+        else if (t === 'e') val = new CellError(v || '#ERROR');
+        else val = (v === '' ? '' : (Number.isFinite(Number(v)) ? Number(v) : v));
+        if (typeof val === 'string' && val.length > L.celdaCaracteres) val = val.slice(0, L.celdaCaracteres);
+        row[j] = val;
+      }
+      rows[r] = row;
+    }
+    return { rows: Array.from(rows, x => x || []), warnings };
+  }
+
+  /** @returns {Promise<Array<{name, hidden, rows, warnings}>>} */
+  async function parseXLSX(buffer) {
+    const want = n => /^xl\/(workbook\.xml|_rels\/workbook\.xml\.rels|sharedStrings\.xml|worksheets\/[^/]+\.xml)$/.test(n);
+    const z = await readZip(buffer, want);
+    const wb = guard(z['xl/workbook.xml'], 'workbook');
+    if (!wb) throw new ZipError('El archivo no contiene un libro de Excel válido.');
+    const rels = guard(z['xl/_rels/workbook.xml.rels'] || '', 'relaciones');
+    const sst = guard(z['xl/sharedStrings.xml'] || '', 'textos');
+    const shared = [...sst.matchAll(reTag('si'))].map(m => richText(m[2]));
+    const targets = {};
+    for (const m of rels.matchAll(reTag('Relationship'))) { const a = attrs(m[1]); if (a.Id) targets[a.Id] = a.Target; }
+    const sheets = [...wb.matchAll(reTag('sheet'))].slice(0, L.hojas).map(m => attrs(m[1]));
+    if (!sheets.length) throw new ZipError('El libro no tiene hojas.');
+    return sheets.map((a, i) => {
+      const id = attr(a, 'id');
+      const path = targets[id] ? resolveTarget(targets[id]) : 'xl/worksheets/sheet' + (i + 1) + '.xml';
+      const name = a.name || ('Hoja ' + (i + 1));
+      const xml = guard(z[path] || '', name);
+      const parsed = parseSheet(xml, shared, name);
+      return { name, hidden: a.state === 'hidden' || a.state === 'veryHidden', rows: parsed.rows, warnings: parsed.warnings };
+    });
+  }
+
+  /* ------------------------------ Escritura ------------------------------ */
+  const escXml = s => String(s ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function colName(i) { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+
+  /**
+   * Celdas: string → texto; {n: número, f: 'money'|'int'} → número con formato;
+   * {s: texto, b: true} → negrita. Valores nulos → celda vacía.
+   */
+  function sheetXml(rows, widths) {
+    const cols = widths && widths.length ? '<cols>' + widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('') + '</cols>' : '';
+    const body = rows.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((c, ci) => {
+      if (c === null || c === undefined || c === '') return '';
+      const ref = colName(ci) + (ri + 1);
+      if (typeof c === 'object' && 'n' in c) {
+        if (c.n === null || !Number.isFinite(c.n)) return `<c r="${ref}" t="inlineStr" s="${c.b ? 1 : 0}"><is><t>N/D</t></is></c>`;
+        const style = c.f === 'money' ? (c.b ? 4 : 2) : 3;
+        return `<c r="${ref}" s="${style}"><v>${c.n}</v></c>`;
+      }
+      const text = typeof c === 'object' ? c.s : c, bold = typeof c === 'object' && c.b;
+      return `<c r="${ref}" t="inlineStr"${bold ? ' s="1"' : ''}><is><t xml:space="preserve">${escXml(text)}</t></is></c>`;
+    }).join('') + '</row>').join('');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+      cols + '<sheetData>' + body + '</sheetData></worksheet>';
+  }
+
+  /** @param sheets [{name, rows, widths}] @returns Uint8Array (XLSX) */
+  function writeXLSX(sheets) {
+    const safeName = n => String(n).replace(/[\\/?*[\]:]/g, ' ').slice(0, 31) || 'Hoja';
+    const files = [
+      { name: '[Content_Types].xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>' },
+      { name: '_rels/.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { name: 'xl/workbook.xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map((s, i) => `<sheet name="${escXml(safeName(s.name))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets></workbook>' },
+      { name: 'xl/_rels/workbook.xml.rels', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') + `<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+      { name: 'xl/styles.xml', text: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/></cellXfs></styleSheet>' },
+    ];
+    sheets.forEach((s, i) => files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, text: sheetXml(s.rows, s.widths) }));
+    return writeZip(files);
+  }
+
+  return { CellError, parseXLSX, writeXLSX, colIndex, decodeXml };
+})();
+
+/* --- 06_model.js --- */
+/* ==========================================================================
+ * 06_model.js — Modelo de datos, validación, importación y persistencia.
+ * Sin acceso al DOM: todo es comprobable con pruebas automáticas.
+ * ========================================================================== */
+'use strict';
+
+OxI.model = (function () {
+  const C = OxI.CONFIG, U = OxI.util, Pz = OxI.parse;
+  const LEVELS = ['Regional', 'Local'];
+  const LIMA_METRO = /(municipalidad metropolitana de lima|lima metropolitana)/;
+
+  /* ------------------------- Referencia departamental ------------------------- */
+  const referencia = C.referencia.map(([dep, r, l]) => Object.freeze({ dep, rC: r * 1e8, lC: l * 1e8, nR: null, nL: null }));
+  const nacional = Object.freeze({
+    rC: C.nacional.regionalMillones * 1e8,
+    lC: C.nacional.localMillones * 1e8,
+    tC: (C.nacional.regionalMillones + C.nacional.localMillones) * 1e8,
+  });
+
+  /* ------------------------------ Registros ------------------------------ */
+  const balanceOf = x => (x.committedC === null || x.committedC === undefined) ? null : x.amountC - x.committedC;
+
+  /** Valida un registro proveniente de almacenamiento o respaldo. */
+  function sanitizeRecord(x) {
+    if (!x || typeof x !== 'object') return null;
+    const level = LEVELS.includes(x.level) ? x.level : null;
+    const name = U.clean(x.name, 300), dep = U.clean(x.dep, 120);
+    if (!level || !name || !dep) return null;
+    if (!Number.isSafeInteger(x.amountC) || x.amountC < 0) return null;
+    const committedC = Number.isSafeInteger(x.committedC) ? x.committedC : null;
+    const commitDate = committedC !== null && U.esFechaISO(x.commitDate) ? x.commitDate : '';
+    return {
+      dep, prov: level === 'Local' ? U.clean(x.prov, 120) : '', dist: level === 'Local' ? U.clean(x.dist, 120) : '',
+      name, level, code: U.clean(x.code, 40), amountC: x.amountC,
+      committedC: commitDate ? committedC : null, commitDate,
+      batchId: U.clean(x.batchId, 60), row: Number.isSafeInteger(x.row) ? x.row : null,
+    };
+  }
+
+  function sanitizeBatch(b) {
+    if (!b || typeof b !== 'object' || !LEVELS.includes(b.level)) return null;
+    const num = v => Number.isSafeInteger(v) ? v : null;
+    return {
+      id: U.clean(b.id, 60), level: b.level, fileName: U.clean(b.fileName, 200), fileSize: num(b.fileSize),
+      sha256: /^[0-9a-f]{64}$/.test(b.sha256 || '') ? b.sha256 : '', sheet: U.clean(b.sheet, 100),
+      headerRow: num(b.headerRow), unit: [1, 1000, 1000000].includes(b.unit) ? b.unit : 1,
+      decimal: ['auto', '.', ','].includes(b.decimal) ? b.decimal : 'auto',
+      importedAt: U.clean(b.importedAt, 40), count: num(b.count) || 0, totalC: num(b.totalC) || 0,
+      controlC: num(b.controlC), skipped: num(b.skipped) || 0, dupes: num(b.dupes) || 0,
+      commitDate: U.esFechaISO(b.commitDate) ? b.commitDate : '', status: b.status === 'deshecho' ? 'deshecho' : 'vigente',
+    };
+  }
+
+  function emptyState() {
+    return { schema: 2, records: [], batches: [], previous: { Regional: null, Local: null } };
+  }
+
+  /** Valida un estado completo; devuelve {state, dropped}. */
+  function sanitizeState(raw) {
+    const st = emptyState(); let dropped = 0;
+    if (!raw || typeof raw !== 'object' || raw.schema !== 2) return { state: st, dropped: 0, invalid: true };
+    for (const r of Array.isArray(raw.records) ? raw.records : []) { const s = sanitizeRecord(r); if (s) st.records.push(s); else dropped++; }
+    st.batches = (Array.isArray(raw.batches) ? raw.batches : []).map(sanitizeBatch).filter(Boolean).slice(-100);
+    for (const lv of LEVELS) {
+      const p = raw.previous && raw.previous[lv];
+      if (p && Array.isArray(p.records)) st.previous[lv] = { records: p.records.map(sanitizeRecord).filter(Boolean), batchId: U.clean(p.batchId, 60) };
+    }
+    return { state: st, dropped, invalid: false };
+  }
+
+  /** Migra la base de la v1 (importes en soles con decimales) a céntimos. */
+  function migrateV1(arr) {
+    const st = emptyState(); if (!Array.isArray(arr)) return st;
+    const batchId = 'migrado-v1';
+    for (const x of arr) {
+      if (!x || typeof x !== 'object') continue;
+      const amountC = Number.isFinite(x.amount) ? Math.round(x.amount * 100) : null;
+      const committedC = Number.isFinite(x.committed) ? Math.round(x.committed * 100) : null;
+      const r = sanitizeRecord(Object.assign({}, x, { amountC, committedC, batchId }));
+      if (r) st.records.push(r);
+    }
+    if (st.records.length) {
+      for (const lv of LEVELS) {
+        const recs = st.records.filter(r => r.level === lv);
+        if (recs.length) st.batches.push(sanitizeBatch({ id: batchId, level: lv, fileName: 'Base migrada desde la versión 1.0', importedAt: new Date().toISOString(), count: recs.length, totalC: U.sum(recs, r => r.amountC) }));
+      }
+    }
+    return st;
+  }
+
+  /* ----------------------------- Persistencia ----------------------------- */
+  function load(storage) {
+    try {
+      const raw = storage.getItem(C.claveAlmacen);
+      if (raw) {
+        const res = sanitizeState(JSON.parse(raw));
+        return { state: res.state, dropped: res.dropped, migrated: false, error: res.invalid ? 'La base guardada no tiene un formato reconocido; se inició vacía.' : '' };
+      }
+      const old = storage.getItem(C.claveAlmacenV1);
+      if (old) {
+        const st = migrateV1(JSON.parse(old));
+        return { state: st, dropped: 0, migrated: st.records.length > 0, error: '' };
+      }
+    } catch (e) {
+      return { state: emptyState(), dropped: 0, migrated: false, error: 'No se pudo leer la base guardada; se inició vacía.' };
+    }
+    return { state: emptyState(), dropped: 0, migrated: false, error: '' };
+  }
+
+  function save(storage, state) {
+    try { storage.setItem(C.claveAlmacen, JSON.stringify(state)); return true; } catch (e) { return false; }
+  }
+
+  function clear(storage) {
+    try { storage.removeItem(C.claveAlmacen); storage.removeItem(C.claveAlmacenV1); } catch (e) { /* sin acceso */ }
+    return emptyState();
+  }
+
+  /* ------------------------------ Importación ------------------------------ */
+  /**
+   * Transforma filas de una hoja en registros validados, sin modificar el estado.
+   * @param rows matriz de celdas
+   * @param o {level, headerRow(1..n), idx:{dep,prov,dist,name,amount,code,committed}, unit, decimal,
+   *           commitDate, batchId, controlC}
+   */
+  function buildImport(rows, o) {
+    const res = { records: [], rejected: [], dupes: [], totalsRows: 0, ambiguous: [], warnings: [], codeShared: [], limaRows: [], committedInvalid: 0 };
+    const idx = o.idx, local = o.level === 'Local';
+    const firstSeen = new Map(), byCode = new Map();
+    let dep = '', prov = '';
+    const get = (r, k) => (idx[k] === undefined || idx[k] < 0) ? '' : r[idx[k]];
+    const txt = (r, k, max) => U.clean(get(r, k), max);
+    const isErr = v => v instanceof OxI.xlsx.CellError;
+
+    for (let i = Math.max(0, o.headerRow); i < rows.length; i++) {
+      const r = rows[i] || [], excelRow = i + 1;
+      const nd = txt(r, 'dep', 120), np = txt(r, 'prov', 120), name = txt(r, 'name', 300), dist = txt(r, 'dist', 120), code = txt(r, 'code', 40);
+      const rawAmount = get(r, 'amount');
+      if (!nd && !np && !name && !dist && !code && (rawAmount === '' || rawAmount === undefined)) continue;
+      if (Pz.isTotal(name) || Pz.isTotal(nd) || Pz.isTotal(np)) { res.totalsRows++; continue; }
+      if (nd && nd !== dep) { dep = nd; prov = ''; }
+      if (np) prov = np;
+      const reject = reason => res.rejected.push({ row: excelRow, name: name || '(sin nombre)', reason });
+      if (!name) { if (rawAmount !== '' && rawAmount !== undefined) reject('Sin nombre de entidad'); continue; }
+      if (!dep) { reject('Sin departamento'); continue; }
+      if (local && !prov) { reject('Sin provincia (requerida en el anexo local)'); continue; }
+      if (isErr(rawAmount)) { reject('El tope tiene un error de Excel (' + rawAmount.code + ')'); continue; }
+      const num = Pz.parseNum(rawAmount, o.decimal);
+      if (!num) { reject('Tope vacío o no numérico'); continue; }
+      if (num.value < 0) { reject('Tope negativo'); continue; }
+      const amountC = Pz.toCents(num.value, o.unit);
+      if (amountC === null) { reject('Tope fuera de rango'); continue; }
+      if (num.ambiguous) res.ambiguous.push({ row: excelRow, value: String(rawAmount) });
+
+      // Clave de duplicado: el mismo código Y el mismo nombre; sin código, territorio + nombre (H04).
+      const key = code ? [o.level, code, U.norm(name)].join('|') : [o.level, U.norm(dep), U.norm(prov), U.norm(dist), U.norm(name)].join('|');
+      if (firstSeen.has(key)) { res.dupes.push({ row: excelRow, name, firstRow: firstSeen.get(key) }); continue; }
+      firstSeen.set(key, excelRow);
+      if (code) {
+        const prev = byCode.get(code);
+        if (prev && U.norm(prev.name) !== U.norm(name)) res.codeShared.push({ code, a: prev.name, b: name, row: excelRow });
+        else if (!prev) byCode.set(code, { name, row: excelRow });
+      }
+      if (LIMA_METRO.test(U.norm(name))) res.limaRows.push({ row: excelRow, name });
+
+      let committedC = null;
+      if (idx.committed !== undefined && idx.committed >= 0) {
+        const rc = get(r, 'committed');
+        if (rc !== '' && rc !== undefined && rc !== null) {
+          const cn = isErr(rc) ? null : Pz.parseNum(rc, o.decimal);
+          if (cn) committedC = Pz.toCents(cn.value, o.unit);
+          else res.committedInvalid++;
+        }
+      }
+      res.records.push({
+        dep, prov: local ? prov : '', dist: local ? dist : '', name, level: o.level, code, amountC,
+        committedC, commitDate: committedC === null ? '' : o.commitDate, batchId: o.batchId, row: excelRow,
+      });
+    }
+
+    res.totalC = U.sum(res.records, x => x.amountC);
+    res.diffC = Number.isSafeInteger(o.controlC) ? res.totalC - o.controlC : null;
+    res.byDep = new Map();
+    for (const x of res.records) res.byDep.set(x.dep, (res.byDep.get(x.dep) || 0) + x.amountC);
+    if (res.ambiguous.length) res.warnings.push(`${res.ambiguous.length} importe(s) en texto como «1.234» o «1,234» admiten dos lecturas. Elige el separador decimal correcto antes de importar.`);
+    if (res.codeShared.length) res.warnings.push(`${res.codeShared.length} código(s) se repiten en entidades distintas (por ejemplo, municipalidad provincial y distrital). Se conservaron ambas; verifica que el código sea el identificador oficial.`);
+    if (res.limaRows.length && local) res.warnings.push('El archivo local incluye a Lima Metropolitana. El tope nacional la ubica en el bloque regional: evita sumarla dos veces.');
+    if (res.committedInvalid) res.warnings.push(`${res.committedInvalid} compromiso(s) no son numéricos. Se registran como N/D, no como cero.`);
+    return res;
+  }
+
+  /** Aplica una importación revisada: reemplaza el nivel y guarda copia para deshacer. */
+  function applyImport(state, level, records, batch) {
+    const old = state.records.filter(r => r.level === level);
+    const prevBatch = [...state.batches].reverse().find(b => b.level === level && b.status === 'vigente');
+    return {
+      schema: 2,
+      records: state.records.filter(r => r.level !== level).concat(records),
+      batches: state.batches.concat([sanitizeBatch(batch)]).slice(-100),
+      previous: Object.assign({}, state.previous, { [level]: { records: old, batchId: prevBatch ? prevBatch.id : '' } }),
+    };
+  }
+
+  /** Revierte la última importación de un nivel. */
+  function undoImport(state, level) {
+    const p = state.previous[level];
+    if (!p) return null;
+    const current = [...state.batches].reverse().find(b => b.level === level && b.status === 'vigente');
+    return {
+      schema: 2,
+      records: state.records.filter(r => r.level !== level).concat(p.records),
+      batches: state.batches.map(b => (current && b.id === current.id) ? Object.assign({}, b, { status: 'deshecho' }) : b),
+      previous: Object.assign({}, state.previous, { [level]: null }),
+    };
+  }
+
+  /* ------------------------------- Agregados ------------------------------- */
+  /**
+   * Saldo de una selección (H02/H06). Solo se informa si todos los registros
+   * tienen compromisos, con una misma fecha de corte.
+   */
+  function aggregateBalance(records) {
+    if (!records.length) return { state: 'vacio', sumC: null };
+    const missing = records.filter(x => balanceOf(x) === null).length;
+    if (missing) return { state: 'incompleto', sumC: null, missing, total: records.length };
+    const dates = U.uniqSorted(records.map(x => x.commitDate));
+    if (dates.length !== 1) return { state: 'fechas', sumC: null, dates };
+    const negatives = records.filter(x => balanceOf(x) < 0).length;
+    return { state: negatives ? 'excedido' : 'ok', sumC: U.sum(records, balanceOf), negatives, date: dates[0] };
+  }
+
+  /** Resumen departamental calculado desde los anexos importados (H03). */
+  function summaryFromRecords(records) {
+    const m = new Map();
+    for (const x of records) {
+      const s = m.get(x.dep) || { dep: x.dep, rC: 0, lC: 0, nR: 0, nL: 0 };
+      if (x.level === 'Regional') { s.rC += x.amountC; s.nR++; } else { s.lC += x.amountC; s.nL++; }
+      m.set(x.dep, s);
+    }
+    return [...m.values()];
+  }
+
+  /** Respaldo descargable. */
+  function backupPayload(state) {
+    return { aplicativo: 'Monitor OxI', version: C.version, generado: new Date().toISOString(), estado: state };
+  }
+
+  function restoreBackup(text) {
+    if (text.length > C.limites.respaldoBytes) throw new Error('El respaldo supera el tamaño permitido.');
+    let obj;
+    try { obj = JSON.parse(text); } catch (e) { throw new Error('El archivo no es un respaldo válido (JSON dañado).'); }
+    if (!obj || obj.aplicativo !== 'Monitor OxI' || !obj.estado) throw new Error('El archivo no es un respaldo de este aplicativo.');
+    const res = sanitizeState(obj.estado);
+    if (res.invalid) throw new Error('El respaldo tiene un formato no reconocido.');
+    return res;
+  }
+
+  return { LEVELS, referencia, nacional, balanceOf, sanitizeRecord, sanitizeState, migrateV1, emptyState, load, save, clear, buildImport, applyImport, undoImport, aggregateBalance, summaryFromRecords, backupPayload, restoreBackup };
+})();
+
+/* --- 07_ui.js --- */
+/* ==========================================================================
+ * 07_ui.js — Interfaz. Construye el DOM solo con createElement y textContent:
+ * nunca se inserta HTML como texto, lo que permite aplicar Trusted Types y una CSP estricta.
+ * ========================================================================== */
+'use strict';
+
+OxI.ui = (function () {
+  const C = OxI.CONFIG, U = OxI.util, Pz = OxI.parse, M = OxI.model, X = OxI.xlsx;
+  const $ = id => document.getElementById(id);
+
+  /* ------------------------------ DOM seguro ------------------------------ */
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    if (props) {
+      for (const [k, v] of Object.entries(props)) {
+        if (v === null || v === undefined || v === false) continue;
+        if (k === 'class') el.className = v;
+        else if (k === 'text') el.textContent = v;
+        else if (k === 'style') { for (const [p, val] of Object.entries(v)) el.style[p] = val; }
+        else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? '' : String(v));
+      }
+    }
+    for (const kid of kids.flat(Infinity)) {
+      if (kid === null || kid === undefined || kid === false) continue;
+      el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+    }
+    return el;
+  }
+  const swatch = lv => h('span', { class: 'swatch swatch--' + (lv === 'Regional' ? 'regional' : 'local'), 'aria-hidden': 'true' });
+
+  /* ------------------------------ Almacenamiento ------------------------------ */
+  const storage = (() => {
+    try { const k = '__oxi_prueba'; localStorage.setItem(k, '1'); localStorage.removeItem(k); return { s: localStorage, persistent: true }; }
+    catch (e) { const m = new Map(); return { s: { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: k => m.delete(k) }, persistent: false }; }
+  })();
+
+  const S = {
+    tab: 'summary', mode: 'summary', page: 1, filtered: [], store: M.emptyState(),
+    sheets: [], file: null, review: null, qCache: new WeakMap(),
+  };
+
+  /* ------------------------------ Avisos y diálogos ------------------------------ */
+  let toastTimer = 0;
+  function notify(msg, kind) {
+    const t = $('toast');
+    t.textContent = msg; t.classList.toggle('is-error', kind === 'error'); t.classList.add('is-on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('is-on'), kind === 'error' ? 8000 : 5000);
+  }
+
+  function ask({ title, body, ok = 'Aceptar', cancel = 'Cancelar', danger = false }) {
+    const d = $('dialog');
+    const parts = [].concat(body).map(x => typeof x === 'string' ? h('p', { text: x }) : x);
+    if (typeof d.showModal !== 'function') return Promise.resolve(window.confirm(title + '\n\n' + parts.map(p => p.textContent).join('\n')));
+    return new Promise(resolve => {
+      $('dialogTitle').textContent = title;
+      $('dialogBody').replaceChildren(...parts);
+      $('dialogOk').textContent = ok; $('dialogOk').className = 'btn ' + (danger ? 'btn--danger' : 'btn--primary');
+      $('dialogCancel').textContent = cancel;
+      d.returnValue = '';
+      d.addEventListener('close', () => resolve(d.returnValue === 'ok'), { once: true });
+      d.showModal();
+      $(danger ? 'dialogCancel' : 'dialogOk').focus();
+    });
+  }
+
+  function download(name, blob) {
+    const url = URL.createObjectURL(blob), a = h('a', { href: url, download: name });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  /* ------------------------------ Encabezado y pie ------------------------------ */
+  function renderStatic() {
+    const N = M.nacional;
+    $('normaTag').textContent = `TMCA ${C.anio}: ${C.norma}`;
+    $('ribbonTotal').textContent = U.compact(N.tC);
+    $('ribbonNote').textContent = `Suma de los topes publicados por el ${C.norma} (${U.fechaPE(C.fechaPublicacion)}), redondeada a millones. Un tope no es dinero disponible: el saldo depende de los convenios y adendas posteriores.`;
+    const pr = N.rC / N.tC * 100, pl = 100 - pr;
+    $('ribbonBar').setAttribute('aria-label', `Regional ${pr.toFixed(1)} %, local ${pl.toFixed(1)} %`);
+    $('ribbonBar').replaceChildren(
+      h('span', { class: 'ribbon__seg ribbon__seg--regional', style: { width: pr + '%' } }),
+      h('span', { class: 'ribbon__seg ribbon__seg--local', style: { width: pl + '%' } }));
+    $('ribbonLegend').replaceChildren(
+      h('div', null, h('dt', null, swatch('Regional'), 'Gobiernos regionales y Lima Metropolitana'), h('dd', null, U.compact(N.rC), h('small', { text: pr.toFixed(1) + ' %' }))),
+      h('div', null, h('dt', null, swatch('Local'), `Gobiernos locales (${U.entero(C.nacional.municipalidades)} municipalidades)`), h('dd', null, U.compact(N.lC), h('small', { text: pl.toFixed(1) + ' %' }))));
+
+    const links = C.fuentes.map((f, i) => [i ? '; ' : '', h('a', { href: f.url, target: '_blank', rel: 'noopener noreferrer', text: f.etiqueta })]);
+    $('footSources').replaceChildren(...links.flat(), '.');
+    $('footNote').textContent = `Fuentes consultadas por la versión 1.0 el ${U.fechaPE(C.fechaConsultaFuentes)}; deben verificarse en su versión vigente. N/D significa no determinado. Los totales suman solo los registros filtrados y no acreditan recursos. Versión ${C.version}.`;
+    $('sourceLinks').replaceChildren(...C.fuentes.filter(f => f.descarga).map(f => h('a', { class: 'btn', href: f.url, target: '_blank', rel: 'noopener noreferrer', text: f.etiqueta })));
+    $('fileLimits').textContent = `XLSX, CSV o TSV de hasta ${Math.round(C.limites.archivoBytes / 1048576)} MB y ${U.entero(C.limites.filas)} filas. Los libros protegidos con contraseña no se pueden leer.`;
+    $('commitDate').min = C.fechaMinimaCorte; $('commitDate').max = U.hoyISO();
+  }
+
+  /* ---------------------------------- Pestañas ---------------------------------- */
+  const TABS = [['tabSummary', 'summary'], ['tabDetail', 'detail'], ['tabImport', 'import']];
+  function setTab(name, focus) {
+    S.tab = name;
+    if (name !== 'import') S.mode = name;
+    for (const [id, t] of TABS) {
+      const on = t === name, b = $(id);
+      b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    }
+    $('importPanel').classList.toggle('hidden', name !== 'import');
+    $('queryPanel').classList.toggle('hidden', name === 'import');
+    $('chartPanel').classList.toggle('hidden', name === 'import');
+    if (name === 'import') renderBase(); else resetFilters();
+  }
+
+  /* ---------------------------------- Consulta ---------------------------------- */
+  const level = () => $('level').value;
+  const useImportedSummary = () => S.mode === 'summary' && $('summarySource').value === 'data' && S.store.records.length > 0;
+
+  function base() {
+    if (S.mode === 'detail') return S.store.records;
+    return useImportedSummary() ? M.summaryFromRecords(S.store.records) : M.referencia;
+  }
+
+  function amountOf(x) {
+    if (S.mode === 'detail') return x.amountC;
+    const lv = level();
+    return lv === 'Regional' ? x.rC : lv === 'Local' ? x.lC : x.rC + x.lC;
+  }
+
+  function searchText(x) {
+    let t = S.qCache.get(x);
+    if (t === undefined) { t = U.norm([x.dep, x.prov, x.dist, x.name, x.code].filter(Boolean).join(' ')); S.qCache.set(x, t); }
+    return t;
+  }
+
+  function fillSelect(id, values, placeholder) {
+    const node = $(id), old = node.value;
+    node.replaceChildren(h('option', { value: '' }, placeholder), ...values.map(v => h('option', { value: v }, v)));
+    if (values.includes(old)) node.value = old;
+  }
+
+  function syncFilters() {
+    const b = base(), detail = S.mode === 'detail';
+    fillSelect('dep', U.uniqSorted(b.map(x => x.dep)), 'Todos los departamentos');
+    const dep = $('dep').value, scoped = detail ? b.filter(x => x.level === 'Local' && (!dep || x.dep === dep)) : [];
+    fillSelect('prov', U.uniqSorted(scoped.map(x => x.prov)), 'Todas las provincias');
+    const prov = $('prov').value;
+    fillSelect('dist', U.uniqSorted(scoped.filter(x => !prov || x.prov === prov).map(x => x.dist)), 'Todos los distritos');
+    $('provLabel').classList.toggle('hidden', !detail);
+    $('distLabel').classList.toggle('hidden', !detail);
+    $('prov').disabled = $('dist').disabled = !detail || level() === 'Regional';
+    $('summarySourceWrap').classList.toggle('hidden', detail);
+    $('summarySource').querySelector('option[value="data"]').disabled = !S.store.records.length;
+    if (!S.store.records.length) $('summarySource').value = 'ref';
+  }
+
+  function resetFilters() {
+    for (const id of ['query', 'dep', 'prov', 'dist']) $(id).value = '';
+    $('level').value = 'Todos'; $('sort').value = 'amountDesc'; S.page = 1;
+    syncFilters(); render();
+  }
+
+  function applyFilters() {
+    const q = U.norm($('query').value), dep = $('dep').value, prov = $('prov').value, dist = $('dist').value, lv = level();
+    const detail = S.mode === 'detail';
+    const list = base().filter(x =>
+      (!dep || x.dep === dep) &&
+      (!detail || ((lv === 'Todos' || x.level === lv) && (!prov || x.prov === prov) && (!dist || x.dist === dist))) &&
+      (detail || lv === 'Todos' || amountOf(x) > 0 || (lv === 'Regional' ? x.nR : x.nL)) &&
+      (!q || searchText(x).includes(q)));
+    const sort = $('sort').value, byName = (a, b) => (a.name || a.dep).localeCompare(b.name || b.dep, 'es');
+    list.sort((a, b) =>
+      sort === 'nameAsc' ? byName(a, b) :
+      sort === 'depAsc' ? (a.dep.localeCompare(b.dep, 'es') || byName(a, b)) :
+      sort === 'amountAsc' ? (amountOf(a) - amountOf(b) || byName(a, b)) :
+      (amountOf(b) - amountOf(a) || byName(a, b)));
+    return list;
+  }
+
+  function columns() {
+    if (S.mode === 'detail') {
+      return [
+        { label: 'Departamento', sort: 'depAsc' }, { label: 'Provincia' }, { label: 'Distrito' },
+        { label: 'Entidad', sort: 'nameAsc' }, { label: 'Nivel' }, { label: 'Código' },
+        { label: 'Tope (S/)', num: true, sort: 'amount' }, { label: 'Saldo calculado (S/)', num: true }, { label: 'Corte del saldo' },
+      ];
+    }
+    const lv = level(), cols = [{ label: 'Departamento', sort: 'depAsc' }];
+    if (lv !== 'Local') cols.push({ label: 'Gobierno regional (S/ M)', num: true, sort: lv === 'Regional' ? 'amount' : null });
+    if (lv !== 'Regional') cols.push({ label: 'Gobiernos locales (S/ M)', num: true, sort: lv === 'Local' ? 'amount' : null });
+    if (lv === 'Todos') cols.push({ label: 'Total (S/ M)', num: true, sort: 'amount' });
+    if (useImportedSummary()) cols.push({ label: 'Entidades', num: true });
+    return cols;
+  }
+
+  function headRow() {
+    const sort = $('sort').value;
+    return h('tr', null, columns().map(c => {
+      let ariaSort = null, ind = '';
+      if (c.sort === 'amount' && sort.startsWith('amount')) { ariaSort = sort === 'amountDesc' ? 'descending' : 'ascending'; ind = sort === 'amountDesc' ? '▼' : '▲'; }
+      else if (c.sort && c.sort === sort) { ariaSort = 'ascending'; ind = '▲'; }
+      const inner = c.sort
+        ? h('button', { type: 'button', 'data-sort': c.sort, title: 'Ordenar por ' + c.label.toLowerCase() }, c.label, h('span', { class: 'sort-ind', 'aria-hidden': 'true', text: ind }))
+        : h('span', null, c.label);
+      return h('th', { scope: 'col', class: c.num ? 'num' : null, 'aria-sort': ariaSort }, inner);
+    }));
+  }
+
+  /** Copia el nombre de cada columna en data-label: en celular la fila se muestra como tarjeta. */
+  function labelCells(tr, labels) {
+    let i = 0;
+    for (const cell of tr.children) {
+      if (labels[i]) cell.setAttribute('data-label', labels[i]);
+      i += Number(cell.getAttribute('colspan') || 1);
+    }
+    return tr;
+  }
+
+  function rowFor(x) {
+    return labelCells(rowCells(x), columns().map(c => c.label));
+  }
+
+  function rowCells(x) {
+    const td = (v, cls) => h('td', { class: cls || null }, v);
+    if (S.mode === 'detail') {
+      const bal = M.balanceOf(x);
+      return h('tr', null,
+        td(x.dep), td(x.prov || '—'), td(x.dist || '—'), td(x.name, 'name'),
+        td(h('span', { class: 'lvl' }, swatch(x.level), x.level)), td(x.code || '—', 'code'),
+        td(U.soles(x.amountC), 'num'),
+        bal === null ? td('N/D', 'num na') : td([U.soles(bal), bal < 0 ? h('span', { class: 'tag-neg', text: 'Excede' }) : null], 'num' + (bal < 0 ? ' neg' : '')),
+        td(x.commitDate ? U.fechaPE(x.commitDate) : '—'));
+    }
+    const lv = level(), cells = [td(x.dep, 'name')];
+    if (lv !== 'Local') cells.push(td(U.millones(x.rC), 'num'));
+    if (lv !== 'Regional') cells.push(td(U.millones(x.lC), 'num'));
+    if (lv === 'Todos') cells.push(td(U.millones(x.rC + x.lC), 'num'));
+    if (useImportedSummary()) cells.push(td(U.entero((lv === 'Regional' ? 0 : x.nL) + (lv === 'Local' ? 0 : x.nR)), 'num'));
+    return h('tr', null, cells);
+  }
+
+  function footRow(list, sumC, bal) {
+    const tr = footCells(list, sumC, bal);
+    return tr ? labelCells(tr, columns().map((c, i) => i === 0 ? '' : c.label)) : null;
+  }
+
+  function footCells(list, sumC, bal) {
+    if (!list.length) return null;
+    const td = (v, cls, extra) => h('td', Object.assign({ class: cls || null }, extra || {}), v);
+    if (S.mode === 'detail') {
+      return h('tr', null, td('Total de la selección', 'name', { colspan: 6 }), td(U.soles(sumC), 'num'), td(bal.sumC === null ? 'N/D' : U.soles(bal.sumC), 'num' + (bal.sumC === null ? ' na' : bal.sumC < 0 ? ' neg' : '')), td(''));
+    }
+    const lv = level(), cells = [td('Total de la selección', 'name')];
+    if (lv !== 'Local') cells.push(td(U.millones(U.sum(list, x => x.rC)), 'num'));
+    if (lv !== 'Regional') cells.push(td(U.millones(U.sum(list, x => x.lC)), 'num'));
+    if (lv === 'Todos') cells.push(td(U.millones(sumC), 'num'));
+    if (useImportedSummary()) cells.push(td(U.entero(U.sum(list, x => (lv === 'Regional' ? 0 : x.nL) + (lv === 'Local' ? 0 : x.nR))), 'num'));
+    return h('tr', null, cells);
+  }
+
+  function balanceView(list) {
+    if (S.mode !== 'detail') return { bal: { state: 'resumen', sumC: null }, text: 'N/D', hint: 'Requiere compromisos por entidad, en la consulta por entidad.', cls: 'kpi--muted' };
+    const b = M.aggregateBalance(list);
+    switch (b.state) {
+      case 'vacio': return { bal: b, text: 'N/D', hint: 'Sin resultados.', cls: 'kpi--muted' };
+      case 'incompleto': return { bal: b, text: 'N/D', hint: `${U.entero(b.missing)} de ${U.entero(b.total)} entidades sin compromisos registrados.`, cls: 'kpi--muted' };
+      case 'fechas': return { bal: b, text: 'N/D', hint: `Cortes distintos (${b.dates.map(U.fechaPE).slice(0, 3).join(', ')}${b.dates.length > 3 ? '…' : ''}): no se suman.`, cls: 'kpi--muted' };
+      case 'excedido': return { bal: b, text: U.compact(b.sumC), hint: `${U.entero(b.negatives)} entidad(es) superan su tope. Este monto no es capacidad disponible.`, cls: 'kpi--danger' };
+      default: return { bal: b, text: U.compact(b.sumC), hint: `Al ${U.fechaPE(b.date)}, según compromisos importados. No certificado.`, cls: '' };
+    }
+  }
+
+  function describeFilters() {
+    const q = $('query').value.trim(), lv = level(), detail = S.mode === 'detail';
+    const parts = [$('dep').value || 'todos los departamentos'];
+    if (detail && $('prov').value) parts.push('provincia ' + $('prov').value);
+    if (detail && $('dist').value) parts.push('distrito ' + $('dist').value);
+    parts.push(lv === 'Todos' ? 'regional y local' : lv === 'Regional' ? 'solo regional' : 'solo local');
+    if (q) parts.push('búsqueda «' + q + '»');
+    return 'Consulta: ' + parts.join('; ') + '.';
+  }
+
+  function coverageText() {
+    if (S.mode === 'summary') {
+      return useImportedSummary()
+        ? 'Resumen calculado con los anexos importados en este navegador (montos exactos). Verifica que ambos anexos estén completos antes de comparar departamentos.'
+        : `Cobertura parcial: 10 departamentos con cifras redondeadas de la versión 1.0. Su suma no es el total nacional. Para montos exactos, carga los anexos oficiales.`;
+    }
+    if (!S.store.records.length) return 'Aún no hay entidades cargadas. Descarga los anexos del MEF y cárgalos en «Cargar anexos y respaldo».';
+    const r = S.store.records.filter(x => x.level === 'Regional').length, l = S.store.records.length - r;
+    return `Base importada en este navegador: ${U.entero(r)} entidades regionales y ${U.entero(l)} locales. Cobertura no certificada: compara los totales con el MEF. La búsqueda por provincia muestra solo gobiernos locales.`;
+  }
+
+  function dataAlerts(list) {
+    const out = [];
+    if (S.mode === 'detail' && level() === 'Todos') {
+      const lima = re => list.some(x => re(x) && /(municipalidad metropolitana de lima|lima metropolitana)/.test(U.norm(x.name)));
+      if (lima(x => x.level === 'Regional') && lima(x => x.level === 'Local')) out.push({ cls: 'info', text: 'Lima Metropolitana figura en los dos niveles. Para no sumarla dos veces, filtra un solo nivel o revisa la clasificación del anexo.' });
+    }
+    return out.map(a => h('li', { class: a.cls || null, text: a.text }));
+  }
+
+  function render() {
+    const list = applyFilters(), detail = S.mode === 'detail';
+    S.filtered = list;
+    const sumC = U.sum(list, amountOf), bv = balanceView(list);
+
+    $('scopeTitle').textContent = detail ? 'Capacidad por entidad' : 'Capacidad por departamento';
+    $('scopeSub').textContent = detail ? 'Montos de los anexos importados, en soles.' : (useImportedSummary() ? 'Agregado de los anexos importados, en millones de soles.' : 'Cifras de referencia redondeadas, en millones de soles.');
+    $('coverageNotice').textContent = coverageText();
+    $('dataAlerts').replaceChildren(...dataAlerts(list));
+
+    $('selectedAmount').textContent = list.length ? U.compact(sumC) : '—';
+    $('selectedUnit').textContent = detail ? 'Suma de los topes de las entidades filtradas.' : (useImportedSummary() ? 'Suma exacta de los anexos importados.' : 'Suma de cifras redondeadas por departamento.');
+    $('countLabel').textContent = detail ? 'Entidades' : 'Departamentos';
+    $('selectedCount').textContent = U.entero(list.length);
+    $('selectedBalance').textContent = bv.text;
+    $('balanceLabel').textContent = bv.hint;
+    $('balanceKpi').className = 'kpi ' + bv.cls;
+    $('filterSummary').textContent = describeFilters();
+    $('tableCaption').textContent = (detail ? 'Topes por entidad. ' : 'Topes por departamento. ') + describeFilters();
+
+    const last = Math.max(1, Math.ceil(list.length / C.pagina));
+    S.page = Math.min(Math.max(1, S.page), last);
+    $('headRows').replaceChildren(headRow());
+    const pageRows = list.slice((S.page - 1) * C.pagina, S.page * C.pagina).map(rowFor);
+    $('bodyRows').replaceChildren(...(pageRows.length ? pageRows : [h('tr', null, h('td', { class: 'empty', colspan: columns().length }, list.length ? '' : (detail && !S.store.records.length ? 'Todavía no hay entidades. Carga un anexo para consultarlas.' : 'No hay resultados con estos filtros. Prueba con otra búsqueda o limpia los filtros.')))]));
+    const f = footRow(list, sumC, bv.bal);
+    $('footRows').replaceChildren(...(f ? [f] : []));
+
+    $('pageInfo').textContent = `Página ${S.page} de ${last}; ${U.entero(list.length)} resultado(s)`;
+    $('prev').disabled = S.page <= 1; $('next').disabled = S.page >= last;
+    for (const id of ['csv', 'xlsx', 'print']) $(id).disabled = !list.length;
+    renderChart(list);
+  }
+
+  function renderChart(list) {
+    const detail = S.mode === 'detail', lv = level();
+    const ranked = [...list].sort((a, b) => amountOf(b) - amountOf(a)).slice(0, 8);
+    const max = Math.max(1, ...ranked.map(amountOf));
+    const key = [];
+    if (detail || lv !== 'Local') key.push(h('span', null, swatch('Regional'), 'Regional'));
+    if (detail || lv !== 'Regional') key.push(h('span', null, swatch('Local'), 'Local'));
+    $('chartKey').replaceChildren(...key);
+    if (!ranked.length) { $('chart').replaceChildren(h('li', { class: 'sub' }, 'No hay datos para graficar.')); return; }
+    $('chart').replaceChildren(...ranked.map(x => {
+      const name = detail ? x.name : x.dep, val = amountOf(x);
+      const segs = detail
+        ? [h('span', { class: 'chart__seg chart__seg--' + (x.level === 'Regional' ? 'regional' : 'local'), style: { width: (val / max * 100) + '%' } })]
+        : [lv !== 'Local' ? h('span', { class: 'chart__seg chart__seg--regional', style: { width: (x.rC / max * 100) + '%' } }) : null,
+           lv !== 'Regional' ? h('span', { class: 'chart__seg chart__seg--local', style: { width: (x.lC / max * 100) + '%' } }) : null];
+      return h('li', { 'aria-label': `${name}: ${U.compact(val)}` },
+        h('span', { class: 'chart__name', title: name, 'aria-hidden': 'true' }, name),
+        h('span', { class: 'chart__track', 'aria-hidden': 'true' }, segs),
+        h('span', { class: 'chart__val', 'aria-hidden': 'true' }, U.compact(val)));
+    }));
+  }
+
+  /* ---------------------------- Impresión ---------------------------- */
+  function preparePrint() {
+    const detail = S.mode === 'detail', now = new Date();
+    $('printHead').replaceChildren(
+      h('h2', null, 'Monitor de Obras y Servicios por Impuestos: ' + (detail ? 'consulta por entidad' : 'resumen por departamento')),
+      h('p', null, describeFilters() + ` Resultados: ${U.entero(S.filtered.length)}. Unidad: ${detail ? 'soles' : 'millones de soles'}.`),
+      h('p', null, `Tope máximo de capacidad anual ${C.anio}, ${C.norma}. Reporte generado el ${now.toLocaleString('es-PE')}.`),
+      h('p', null, coverageText()));
+    $('printFoot').replaceChildren(
+      h('p', null, 'Fuentes: ' + C.fuentes.map(f => f.etiqueta).join('; ') + '.'),
+      h('p', null, 'N/D significa no determinado. Un tope no es saldo disponible. Prototipo sin certificación de exactitud normativa ni de conciliación nacional.'));
+    $('bodyRows').replaceChildren(...S.filtered.map(rowFor));
+  }
+
+  /* ---------------------------- Exportación ---------------------------- */
+  function exportRows() {
+    const detail = S.mode === 'detail', lv = level(), soles = c => (c === null || c === undefined) ? null : c / 100;
+    if (detail) {
+      const batches = new Map(S.store.batches.map(b => [b.id, b]));
+      const head = ['Departamento', 'Provincia', 'Distrito', 'Entidad', 'Nivel', 'Código', 'Tope (S/)', 'Compromisos netos (S/)', 'Saldo calculado (S/)', 'Fecha de corte', 'Archivo fuente', 'Fila de origen', 'SHA-256 del archivo'];
+      const rows = S.filtered.map(x => {
+        const b = batches.get(x.batchId) || {};
+        return [x.dep, x.prov, x.dist, x.name, x.level, x.code, soles(x.amountC), soles(x.committedC), soles(M.balanceOf(x)), x.commitDate, b.fileName || '', x.row ?? '', b.sha256 || ''];
+      });
+      return { head, rows, money: [6, 7, 8] };
+    }
+    const precision = useImportedSummary() ? 'Exacto (anexos importados)' : 'Redondeado a millones (referencia v1)';
+    const head = ['Departamento', 'Gobierno regional (S/)', 'Gobiernos locales (S/)', 'Tope seleccionado (S/)', 'Precisión'];
+    const rows = S.filtered.map(x => [x.dep, soles(x.rC), soles(x.lC), soles(amountOf(x)), precision]);
+    return { head, rows, money: [1, 2, 3], note: lv === 'Todos' ? '' : 'Tope seleccionado: solo nivel ' + lv.toLowerCase() };
+  }
+
+  function fileBase() {
+    const tag = S.mode === 'detail' ? 'entidades' : 'departamentos';
+    return `OxI_${C.anio}_${tag}_${U.slug($('dep').value || 'peru')}_${U.hoyISO().replace(/-/g, '')}`;
+  }
+
+  function exportCSV() {
+    const { head, rows } = exportRows();
+    const text = '﻿' + [head, ...rows].map(r => r.map(v => Pz.csvCell(v === null ? 'N/D' : v)).join(';')).join('\r\n');
+    download(fileBase() + '.csv', new Blob([text], { type: 'text/csv;charset=utf-8' }));
+    notify(`CSV exportado con ${U.entero(rows.length)} fila(s).`);
+  }
+
+  function exportXLSX() {
+    const { head, rows, money } = exportRows();
+    const bv = balanceView(S.filtered);
+    const data = [head.map(s => ({ s, b: true })), ...rows.map(r => r.map((v, i) => money.includes(i) ? { n: v, f: 'money' } : (v === null ? '' : String(v))))];
+    const total = U.sum(S.filtered, amountOf);
+    const ctx = [
+      [{ s: 'Campo', b: true }, { s: 'Valor', b: true }],
+      ['Aplicativo', 'Monitor de Obras y Servicios por Impuestos, versión ' + C.version],
+      ['Norma de referencia', C.norma + ', publicada el ' + U.fechaPE(C.fechaPublicacion)],
+      ['Generado', new Date().toLocaleString('es-PE')],
+      ['Filtros', describeFilters()],
+      ['Resultados', String(S.filtered.length)],
+      ['Tope de la selección (S/)', { n: total / 100, f: 'money' }],
+      ['Saldo calculado', bv.text + '. ' + bv.hint],
+      ['Cobertura', coverageText()],
+      ['Advertencia', 'Un tope no es saldo disponible. N/D significa no determinado. Prototipo sin certificación.'],
+    ];
+    const widths = head.map((t, i) => money.includes(i) ? 20 : Math.min(48, Math.max(12, t.length + 2)));
+    const bytes = X.writeXLSX([{ name: 'Selección', rows: data, widths }, { name: 'Contexto', rows: ctx, widths: [28, 100] }]);
+    download(fileBase() + '.xlsx', new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    notify(`Excel exportado con ${U.entero(rows.length)} fila(s).`);
+  }
+
+  /* ---------------------------- Importación ---------------------------- */
+  const MAP_IDS = ['mapDep', 'mapProv', 'mapDist', 'mapName', 'mapAmount', 'mapCode', 'mapCommitted'];
+  const PATTERNS = {
+    mapDep: /departamento|^region|dpto/, mapProv: /provincia/, mapDist: /distrito/,
+    mapName: /entidad|municipalidad|gobierno (regional|local)|pliego|nombre/,
+    mapAmount: /tope|maxim|tmca|ciprl|limite|monto/, mapCode: /ubigeo|codigo|cod\./, mapCommitted: /compromis|convenios posteriores/,
+  };
+
+  function autoHeader(rows) {
+    let best = 0, score = -1;
+    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+      const a = (rows[i] || []).map(v => U.norm(v));
+      const s = Object.values(PATTERNS).reduce((t, p) => t + (a.some(v => p.test(v)) ? 1 : 0), 0);
+      if (s > score) { score = s; best = i; }
+    }
+    return best + 1;
+  }
+
+  const currentSheet = () => S.sheets[Number($('sheetChoice').value)] || S.sheets[0];
+  const headerIndex = () => Math.max(0, Math.floor(Number($('headerRow').value) || 1) - 1);
+
+  function setStatus(msg, kind) {
+    const s = $('fileStatus');
+    s.textContent = msg; s.className = 'status' + (kind ? ' is-' + kind : '');
+  }
+
+  function invalidateReview() {
+    S.review = null; $('reviewStep').hidden = true; $('confirmImport').disabled = true;
+  }
+
+  function buildMapping() {
+    const sheet = currentSheet(); if (!sheet) return;
+    const hIdx = headerIndex(), row = sheet.rows[hIdx] || [];
+    const width = Math.min(C.limites.columnas, Math.max(row.length, ...sheet.rows.slice(hIdx, hIdx + 30).map(r => r.length), 1));
+    const label = i => `${i + 1}: ${U.clean(row[i], 60) || '(sin título)'}`;
+    const used = new Set();
+    for (const id of MAP_IDS) {
+      const node = $(id);
+      node.replaceChildren(h('option', { value: '' }, '— Sin asignar —'), ...Array.from({ length: width }, (_, i) => h('option', { value: String(i) }, label(i))));
+      const j = row.findIndex((v, i) => !used.has(i) && PATTERNS[id].test(U.norm(v)));
+      if (j >= 0) { node.value = String(j); used.add(j); }
+    }
+    $('provReq').classList.toggle('hidden', $('importLevel').value !== 'Local');
+    renderPreview();
+    invalidateReview();
+  }
+
+  function renderPreview() {
+    const sheet = currentSheet(); if (!sheet) return;
+    const hIdx = headerIndex(), row = sheet.rows[hIdx] || [];
+    const width = Math.min(C.limites.columnas, Math.max(row.length, ...sheet.rows.slice(hIdx, hIdx + 30).map(r => r.length), 1));
+    const mapped = new Map(MAP_IDS.filter(id => $(id).value !== '').map(id => [Number($(id).value), $(id).closest('label').firstChild.textContent.trim()]));
+    const cell = v => v instanceof X.CellError ? v.code : (v ?? '');
+    const thead = h('tr', null, Array.from({ length: width }, (_, i) => {
+      const text = U.clean(row[i], 40) || 'Columna ' + (i + 1), field = mapped.get(i);
+      const redundant = field && U.norm(text).includes(U.norm(field).split(' ')[0]);
+      return h('th', { class: field ? 'is-mapped' : null, title: field ? 'Asignada a: ' + field : null }, text, field && !redundant ? h('small', null, 'Asignada a: ' + field) : null);
+    }));
+    const body = sheet.rows.slice(hIdx + 1, hIdx + 7).map(r => h('tr', null, Array.from({ length: width }, (_, i) => h('td', null, U.clean(cell(r[i]), 60)))));
+    $('preview').replaceChildren(h('table', null, h('thead', null, thead), h('tbody', null, body)));
+  }
+
+  async function sha256Hex(buf) {
+    try {
+      if (!globalThis.crypto || !crypto.subtle) return '';
+      const d = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(d), b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) { return ''; }
+  }
+
+  function decodeText(buf) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+    catch (e) { return new TextDecoder('windows-1252').decode(buf); }   // CSV guardado por Excel en Windows
+  }
+
+  async function handleFile(f) {
+    invalidateReview(); $('mapStep').hidden = true; S.sheets = []; S.file = null;
+    // Cada archivo empieza limpio: unidad, separador, total de control y corte son propios de ese archivo.
+    $('importUnit').value = '1'; $('decimalSep').value = 'auto'; $('controlTotal').value = ''; $('commitDate').value = ''; $('ackDiff').checked = false;
+    if (!f) return;
+    if (!/\.(xlsx|csv|tsv)$/i.test(f.name)) { setStatus('Formato no admitido. Usa un archivo .xlsx, .csv o .tsv. Si es .xls antiguo, guárdalo como .xlsx desde Excel.', 'error'); return; }
+    if (f.size > C.limites.archivoBytes) { setStatus(`El archivo pesa ${(f.size / 1048576).toFixed(1)} MB y supera el límite de ${Math.round(C.limites.archivoBytes / 1048576)} MB.`, 'error'); return; }
+    setStatus('Leyendo ' + f.name + '…');
+    try {
+      const buf = await f.arrayBuffer();
+      const sha = await sha256Hex(buf);
+      let sheets;
+      if (/\.xlsx$/i.test(f.name)) sheets = await X.parseXLSX(buf);
+      else sheets = [{ name: 'CSV', hidden: false, rows: Pz.parseCSV(decodeText(buf)), warnings: [] }];
+      sheets = sheets.filter(s => s.rows.some(r => r && r.some(v => v !== '' && v !== undefined)));
+      if (!sheets.length) throw new Error('El archivo no tiene hojas con datos.');
+      S.sheets = sheets; S.file = { name: U.clean(f.name, 200), size: f.size, sha256: sha };
+      $('sheetChoice').replaceChildren(...sheets.map((s, i) => h('option', { value: String(i) }, s.name + (s.hidden ? ' (oculta)' : ''))));
+      const first = sheets.findIndex(s => !s.hidden);
+      $('sheetChoice').value = String(first >= 0 ? first : 0);
+      $('headerRow').value = autoHeader(currentSheet().rows);
+      $('importLevel').value = /regional/i.test(f.name) ? 'Regional' : 'Local';
+      buildMapping();
+      $('mapStep').hidden = false;
+      const warn = sheets.flatMap(s => s.warnings || []);
+      setStatus(`Archivo leído: ${sheets.length} hoja(s). Revisa las columnas sugeridas, la unidad y el separador decimal.${warn.length ? ' ' + warn.join(' ') : ''}`, 'ok');
+    } catch (e) {
+      setStatus('No se pudo leer el archivo: ' + (e && e.message ? e.message : 'error desconocido') + '.', 'error');
+    }
+  }
+
+  function reviewImport() {
+    const sheet = currentSheet(); if (!sheet || !S.file) return;
+    const idx = {}; for (const id of MAP_IDS) idx[$(id).dataset.field] = $(id).value === '' ? -1 : Number($(id).value);
+    const lv = $('importLevel').value, unit = Number($('importUnit').value), decimal = $('decimalSep').value;
+    const err = m => { setStatus(m, 'error'); invalidateReview(); };
+    if (idx.dep < 0 || idx.name < 0 || idx.amount < 0) return err('Asigna las columnas de departamento, entidad y tope.');
+    if (lv === 'Local' && idx.prov < 0) return err('Asigna la columna de provincia: es obligatoria en el anexo local.');
+    const chosen = Object.values(idx).filter(v => v >= 0);
+    if (new Set(chosen).size !== chosen.length) return err('Una misma columna está asignada a dos campos. Corrige la asignación.');
+    const cd = $('commitDate').value;
+    if (idx.committed >= 0) {
+      if (!U.esFechaISO(cd)) return err('Indica la fecha de corte de los compromisos o deja esa columna sin asignar.');
+      if (cd < C.fechaMinimaCorte) return err(`La fecha de corte debe ser posterior a la publicación del tope (${U.fechaPE(C.fechaPublicacion)}).`);
+      if (cd > U.hoyISO()) return err('La fecha de corte no puede ser futura.');
+    }
+    let controlC = null;
+    const ct = $('controlTotal').value.trim();
+    if (ct) {
+      const n = Pz.parseNum(ct, decimal === 'auto' ? '.' : decimal);
+      if (!n || n.value < 0) return err('El total oficial no es un número válido.');
+      controlC = Pz.toCents(n.value, unit);
+    }
+    const batchId = U.nuevoId('lote');
+    const res = M.buildImport(sheet.rows, { level: lv, headerRow: headerIndex() + 1, idx, unit, decimal, commitDate: idx.committed >= 0 ? cd : '', batchId, controlC });
+    S.review = { res, lv, unit, decimal, controlC, batchId, sheetName: sheet.name, headerRow: headerIndex() + 1, commitDate: idx.committed >= 0 ? cd : '' };
+    renderReview();
+  }
+
+  function renderReview() {
+    const { res, lv, controlC } = S.review;
+    const stat = (k, v) => h('div', null, h('dt', null, k), h('dd', null, v));
+    const nodes = [h('dl', { class: 'review-stats' },
+      stat('Entidades válidas', U.entero(res.records.length)), stat('Suma de topes', U.compact(res.totalC)),
+      stat('Filas omitidas', U.entero(res.rejected.length)), stat('Duplicados', U.entero(res.dupes.length)),
+      stat('Filas de total excluidas', U.entero(res.totalsRows)), stat('Importes ambiguos', U.entero(res.ambiguous.length)))];
+    const current = S.store.records.filter(x => x.level === lv).length;
+    nodes.push(h('p', { class: 'sub' }, `Nivel ${lv.toLowerCase()}: se reemplazarán ${U.entero(current)} registro(s) actuales. Podrás deshacer esta carga.`));
+    if (controlC !== null) {
+      nodes.push(res.diffC === 0
+        ? h('p', { class: 'ok-line' }, `La suma coincide con el total oficial ingresado (${U.money(controlC)}).`)
+        : h('ul', { class: 'alerts' }, h('li', null, `La suma (${U.money(res.totalC)}) difiere del total oficial (${U.money(controlC)}) en ${U.money(res.diffC)}. Revisa filas omitidas, unidad y encabezados.`)));
+    } else {
+      nodes.push(h('p', { class: 'sub' }, 'Sin total oficial ingresado: no se pudo conciliar la suma.'));
+    }
+    if (res.warnings.length) nodes.push(h('ul', { class: 'alerts' }, res.warnings.map(w => h('li', { class: 'info', text: w }))));
+    const list = (title, items, cols) => {
+      if (!items.length) return [];
+      const head = h('tr', null, cols.map(c => h('th', { scope: 'col' }, c[0])));
+      const body = items.slice(0, 200).map(it => h('tr', null, cols.map(c => h('td', null, String(it[c[1]] ?? '')))));
+      const shown = U.entero(items.length) + (items.length > 200 ? '; se muestran 200' : '');
+      return [
+        h('h4', { class: 'sub', text: `${title} (${shown})` }),
+        h('div', { class: 'review-list', tabindex: '0', role: 'region', 'aria-label': title },
+          h('table', null, h('thead', null, head), h('tbody', null, body))),
+      ];
+    };
+    nodes.push(...list('Filas omitidas', res.rejected, [['Fila', 'row'], ['Entidad', 'name'], ['Motivo', 'reason']]));
+    nodes.push(...list('Duplicados descartados', res.dupes, [['Fila', 'row'], ['Entidad', 'name'], ['Primera aparición', 'firstRow']]));
+    nodes.push(...list('Importes ambiguos', res.ambiguous, [['Fila', 'row'], ['Valor original', 'value']]));
+    $('review').replaceChildren(...nodes);
+    const mismatch = controlC !== null && res.diffC !== 0;
+    $('ackWrap').classList.toggle('hidden', !mismatch); $('ackDiff').checked = false;
+    $('confirmImport').textContent = `Importar ${U.entero(res.records.length)} entidades y reemplazar el nivel ${lv.toLowerCase()}`;
+    $('confirmImport').disabled = !res.records.length || mismatch;
+    $('reviewStep').hidden = false;
+    if (!res.records.length) setStatus('No se reconoció ninguna entidad. Revisa la fila de encabezados, las columnas y la unidad.', 'error');
+    else setStatus('Revisión lista. Confirma para importar.', 'ok');
+    $('reviewStep').scrollIntoView({ block: 'nearest' });
+  }
+
+  async function confirmImport() {
+    const R = S.review; if (!R || !R.res.records.length) return;
+    const current = S.store.records.filter(x => x.level === R.lv).length;
+    const ok = await ask({
+      title: `¿Reemplazar el nivel ${R.lv.toLowerCase()}?`,
+      body: [`Se cargarán ${U.entero(R.res.records.length)} entidades (${U.compact(R.res.totalC)}) desde «${S.file.name}».`,
+        `Los ${U.entero(current)} registros actuales de ese nivel se reemplazarán. El otro nivel no cambia. Podrás deshacer esta carga.`],
+      ok: 'Importar',
+    });
+    if (!ok) return;
+    const batch = {
+      id: R.batchId, level: R.lv, fileName: S.file.name, fileSize: S.file.size, sha256: S.file.sha256, sheet: R.sheetName,
+      headerRow: R.headerRow, unit: R.unit, decimal: R.decimal, importedAt: new Date().toISOString(),
+      count: R.res.records.length, totalC: R.res.totalC, controlC: R.controlC, skipped: R.res.rejected.length, dupes: R.res.dupes.length, commitDate: R.commitDate,
+    };
+    commit(M.applyImport(S.store, R.lv, R.res.records, batch), `Se importaron ${U.entero(R.res.records.length)} entidades del nivel ${R.lv.toLowerCase()}.`);
+    $('file').value = ''; $('mapStep').hidden = true; invalidateReview(); S.sheets = []; S.file = null;
+    setStatus('Ningún archivo seleccionado.');
+    setTab('detail', true);
+  }
+
+  function commit(next, okMsg) {
+    S.store = next; S.qCache = new WeakMap();
+    const saved = M.save(storage.s, S.store);
+    renderBase();
+    if (!saved) notify(okMsg + ' No se pudo guardar en el navegador (espacio insuficiente o bloqueo): los datos se perderán al cerrar. Descarga un respaldo.', 'error');
+    else if (!storage.persistent) notify(okMsg + ' Este navegador no permite guardar datos: descarga un respaldo.', 'error');
+    else notify(okMsg);
+  }
+
+  /* ---------------------------- Base y respaldo ---------------------------- */
+  function renderBase() {
+    const recs = S.store.records, count = lv => recs.filter(x => x.level === lv);
+    const box = (lv) => { const r = count(lv); return h('div', null, h('dt', null, swatch(lv), lv === 'Regional' ? 'Regionales' : 'Locales'), h('dd', null, U.entero(r.length)), h('dd', { class: 'sub' }, U.compact(U.sum(r, x => x.amountC)))); };
+    $('baseCounts').replaceChildren(box('Regional'), box('Local'));
+    $('undoRegional').disabled = !S.store.previous.Regional;
+    $('undoLocal').disabled = !S.store.previous.Local;
+    $('clearData').disabled = !recs.length && !S.store.batches.length;
+    $('backup').disabled = !recs.length;
+    const items = [...S.store.batches].reverse().map(b => h('li', { class: b.status === 'deshecho' ? 'is-undone' : null },
+      h('strong', null, b.fileName || 'Archivo sin nombre'),
+      h('span', null, `${b.level}; ${U.entero(b.count)} entidades; ${U.compact(b.totalC)}`),
+      h('br'), h('span', { class: 'sub' }, (b.importedAt ? new Date(b.importedAt).toLocaleString('es-PE') : '') + (b.sheet ? `; hoja «${b.sheet}»` : '') + (b.controlC !== null ? (b.controlC === b.totalC ? '; conciliado' : '; con diferencia frente al total oficial') : '; sin conciliar') + (b.status === 'deshecho' ? '; deshecha' : '')),
+      b.sha256 ? h('span', { class: 'hash', title: 'Huella SHA-256 del archivo de origen' }, 'SHA-256 ' + b.sha256) : null));
+    $('batchLog').replaceChildren(...(items.length ? items : [h('li', { class: 'sub' }, 'Aún no hay cargas.')]));
+  }
+
+  async function undo(lv) {
+    const ok = await ask({ title: `¿Deshacer la última carga ${lv.toLowerCase()}?`, body: 'Se restaurarán los registros que había antes de esa carga.', ok: 'Deshacer' });
+    if (!ok) return;
+    const next = M.undoImport(S.store, lv);
+    if (next) commit(next, `Se deshizo la última carga del nivel ${lv.toLowerCase()}.`);
+  }
+
+  function backup() {
+    const text = JSON.stringify(M.backupPayload(S.store), null, 1);
+    download(`Respaldo_OxI_${C.anio}_${U.hoyISO().replace(/-/g, '')}.json`, new Blob([text], { type: 'application/json' }));
+    notify('Respaldo descargado. Guárdalo en una carpeta segura.');
+  }
+
+  async function restore(f) {
+    if (!f) return;
+    try {
+      if (f.size > C.limites.respaldoBytes) throw new Error('El respaldo supera el tamaño permitido.');
+      const res = M.restoreBackup(await f.text());
+      const ok = await ask({ title: '¿Restaurar este respaldo?', body: [`Contiene ${U.entero(res.state.records.length)} entidades y ${U.entero(res.state.batches.length)} carga(s) registradas.` + (res.dropped ? ` Se descartarán ${U.entero(res.dropped)} registro(s) inválidos.` : ''), 'La base actual de este navegador se reemplazará por completo.'], ok: 'Restaurar', danger: true });
+      if (ok) commit(res.state, 'Respaldo restaurado.');
+    } catch (e) {
+      notify('No se pudo restaurar: ' + e.message, 'error');
+    } finally { $('restore').value = ''; }
+  }
+
+  async function clearAll() {
+    const ok = await ask({ title: '¿Eliminar todos los datos importados?', body: ['Se borrarán las entidades, el historial de cargas y las copias para deshacer de este navegador. Esta acción no se puede deshacer.', 'Si los necesitarás después, descarga antes un respaldo.'], ok: 'Eliminar', danger: true });
+    if (!ok) return;
+    S.store = M.clear(storage.s); S.qCache = new WeakMap();
+    renderBase(); notify('Datos importados eliminados.');
+  }
+
+  /* ---------------------------------- Eventos ---------------------------------- */
+  function bind() {
+    let t = 0;
+    $('query').addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { S.page = 1; render(); }, 120); });
+    for (const id of ['dep', 'prov', 'dist', 'level', 'sort', 'summarySource']) {
+      $(id).addEventListener('change', () => {
+        if (id === 'dep') { $('prov').value = ''; $('dist').value = ''; }
+        if (id === 'prov') $('dist').value = '';
+        if (id === 'level' && level() === 'Regional') { $('prov').value = ''; $('dist').value = ''; }
+        if (id === 'summarySource') { $('dep').value = ''; }
+        S.page = 1; syncFilters(); render();
+      });
+    }
+    $('headRows').addEventListener('click', e => {
+      const b = e.target.closest('button[data-sort]'); if (!b) return;
+      const k = b.dataset.sort, cur = $('sort').value;
+      $('sort').value = k === 'amount' ? (cur === 'amountDesc' ? 'amountAsc' : 'amountDesc') : k;
+      S.page = 1; render();
+      const again = $('headRows').querySelector(`button[data-sort="${k}"]`); if (again) again.focus();
+    });
+    $('reset').addEventListener('click', resetFilters);
+    $('prev').addEventListener('click', () => { S.page--; render(); });
+    $('next').addEventListener('click', () => { S.page++; render(); });
+    $('csv').addEventListener('click', exportCSV);
+    $('xlsx').addEventListener('click', exportXLSX);
+    $('print').addEventListener('click', () => window.print());
+    window.addEventListener('beforeprint', preparePrint);
+    window.addEventListener('afterprint', render);
+
+    for (const [id, name] of TABS) $(id).addEventListener('click', () => setTab(name));
+    document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
+      const i = TABS.findIndex(([, n]) => n === S.tab);
+      let j = null;
+      if (e.key === 'ArrowRight') j = (i + 1) % TABS.length;
+      else if (e.key === 'ArrowLeft') j = (i - 1 + TABS.length) % TABS.length;
+      else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = TABS.length - 1;
+      if (j !== null) { e.preventDefault(); setTab(TABS[j][1], true); }
+    });
+
+    $('file').addEventListener('change', () => handleFile($('file').files[0]));
+    const dz = $('dropZone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('is-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('is-over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('is-over'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+    $('sheetChoice').addEventListener('change', () => { $('headerRow').value = autoHeader(currentSheet().rows); buildMapping(); });
+    $('headerRow').addEventListener('change', buildMapping);
+    $('importLevel').addEventListener('change', () => { $('provReq').classList.toggle('hidden', $('importLevel').value !== 'Local'); invalidateReview(); });
+    for (const id of MAP_IDS) $(id).addEventListener('change', () => { renderPreview(); invalidateReview(); });
+    for (const id of ['importUnit', 'decimalSep', 'controlTotal', 'commitDate']) $(id).addEventListener('change', invalidateReview);
+    $('reviewImport').addEventListener('click', reviewImport);
+    $('ackDiff').addEventListener('change', () => { $('confirmImport').disabled = !$('ackDiff').checked; });
+    $('confirmImport').addEventListener('click', confirmImport);
+    $('undoRegional').addEventListener('click', () => undo('Regional'));
+    $('undoLocal').addEventListener('click', () => undo('Local'));
+    $('backup').addEventListener('click', backup);
+    $('restore').addEventListener('change', () => restore($('restore').files[0]));
+    $('clearData').addEventListener('click', clearAll);
+  }
+
+  function init() {
+    const res = M.load(storage.s);
+    S.store = res.state;
+    renderStatic(); bind(); setTab('summary');
+    if (res.migrated) { M.save(storage.s, S.store); notify(`Se migraron ${U.entero(S.store.records.length)} registros de la versión 1.0 a céntimos exactos.`); }
+    else if (res.error) notify(res.error, 'error');
+    else if (res.dropped) notify(`Se descartaron ${U.entero(res.dropped)} registro(s) guardados con formato inválido.`, 'error');
+    if (!storage.persistent) notify('Este navegador no permite guardar datos locales: las cargas durarán solo esta sesión.', 'error');
+  }
+
+  return { init };
+})();
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', OxI.ui.init);
+  else OxI.ui.init();
+}
+
+})();
+</script>
+</body>
+</html>
